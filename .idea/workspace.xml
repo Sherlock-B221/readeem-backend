@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3eef209-311b-4b31-9f56-21d6c1e9a505" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/middlewares/request-error.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/user.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/user-routes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controllers/user-controller.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +43,7 @@
       <option name="presentableId" value="Default" />
       <updated>1606414170202</updated>
       <workItem from="1606414171251" duration="1346000" />
-      <workItem from="1606422520130" duration="2401000" />
+      <workItem from="1606422520130" duration="3423000" />
     </task>
     <servers />
   </component>
@@ -59,6 +51,10 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="467" y="215" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1606426047382">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="467" y="215" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.864/1920.0.1024.768@0.0.1536.864" timestamp="1606426047382" />
     <state x="462" y="304" width="471" height="255" key="Github.ShareDialog" timestamp="1606422758075">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
