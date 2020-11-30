@@ -1,13 +1,12 @@
-import * as fs from "fs";
-import {MulterRequest} from "./interfaces/multer_file";
-import {ErrorWithCode} from "./interfaces/error_with_code";
-
 require('dotenv').config();
 
-import express, {Request, Response, NextFunction} from 'express';
+import * as fs from "fs";
+import {ErrorWithCode} from "./interfaces/error_with_code";
 
-const userRoutes = require('./routes/user-routes');
-const RequestError = require('./middlewares/request-error');
+import express, {NextFunction, Request, Response} from 'express';
+
+import userRoutes from './routes/user-routes';
+import RequestError from './middlewares/request-error';
 
 const app = express();
 
@@ -23,8 +22,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 })
 
 //Error Handling for any other error
-app.use((error: ErrorWithCode & Error , req: MulterRequest | Request, res: Response, next: NextFunction) => {
-    if ("file" in req && req.file) {
+app.use((error: ErrorWithCode, req: Request, res: Response, next: NextFunction) => {
+    if (req.file) {
         fs.unlink(req.file.path, (err: any) => {
             console.log(err);
         });
