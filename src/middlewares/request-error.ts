@@ -1,8 +1,10 @@
-class RequestError extends Error {
-    constructor(message, errorCode, err, ip) {
-        super(message);
-        this.code = errorCode;
+import {ErrorWithCode} from "../interfaces/error_with_code";
 
+class RequestError implements ErrorWithCode {
+    // this would give an error by default. To suppress it go to lib.es5.d.ts and on line 973 add a '?' after name and before ':'
+    constructor(message: string, errorCode: number, err?: Error) {
+        this.code = errorCode;
+        this.message = message;
         // If err is passed, it will be logged on the console
         if (err) {
             console.log("\n")
@@ -16,11 +18,14 @@ class RequestError extends Error {
                 + currentdate.getSeconds();
 
             console.log(`The following error occured on ${datetime}:`);
-            console.log(err.reason);
+            console.log(err.message);
             console.log("error catched");
             console.log("\n")
         }
     }
+
+    code: number;
+    message: string;
 }
 
-module.exports = RequestError;
+export default RequestError;
