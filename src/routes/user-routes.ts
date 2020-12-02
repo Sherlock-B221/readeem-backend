@@ -4,12 +4,10 @@ import {signUp} from '../controllers/user-controller.js'
 
 const router = express.Router();
 
-router.get('/signup'
+router.post('/addUserToDb'
     , [
         check('email')
-
             .isEmail(),
-        check('password').isLength({min: 6}),
     ]
     , signUp
 );
