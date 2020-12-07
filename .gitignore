@@ -3,3 +3,6 @@
 *.js
 /dist
 .idea
+.env
+package-lock.json
+
