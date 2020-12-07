@@ -2,7 +2,7 @@ declare module Express {
     interface Request {
         file?: any;
         userData?: any;
-        isValid?: boolean;
+        isAccessTokenValid?: boolean;
         accessToken?: string;
         refreshToken?: string;
     }

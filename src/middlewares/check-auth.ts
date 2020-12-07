@@ -22,41 +22,48 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
             "refreshToken": refreshToken
         }) != null;
         if (!tokenBlacklisted) {
-            const decodedToken = jwt.verify(accessToken, process.env.JWT_KEY);
-            req.userData = {userId: (decodedToken as DecodedToken).userId, email: (decodedToken as DecodedToken).email};
-            req.isValid = true;
-            next();
-        } else if (!refreshRevoked) {
-            const decodedRefreshToken = jwt.verify(refreshToken, process.env.JWT_KEY);
-            await RefreshRevoked.create({refreshToken});
-            let userId = (decodedRefreshToken as DecodedToken).userId;
-            let email = (decodedRefreshToken as DecodedToken).email;
-            req.userData = {
-                userId,
-                email
-            };
-            req.isValid = false;
-            let newAccessToken,newRefreshToken;
             try {
-                newAccessToken = jwt.sign(
-                    {userId: userId, email: email},
-                    process.env.JWT_KEY, {
-                        expiresIn: '6hr' // expires in 2d
+                const decodedAccessToken = jwt.verify(accessToken, process.env.JWT_KEY);
+                req.userData = {
+                    userId: (decodedAccessToken as DecodedToken).userId,
+                    email: (decodedAccessToken as DecodedToken).email
+                };
+                req.isAccessTokenValid = true;
+                next();
+            } catch (e) {
+                if (!refreshRevoked) {
+                    const decodedRefreshToken = jwt.verify(refreshToken, process.env.JWT_KEY);
+                    await RefreshRevoked.create({refreshToken});
+                    let userId = (decodedRefreshToken as DecodedToken).userId;
+                    let email = (decodedRefreshToken as DecodedToken).email;
+                    req.userData = {
+                        userId,
+                        email
+                    };
+                    req.isAccessTokenValid = false;
+                    let newAccessToken, newRefreshToken;
+                    try {
+                        newAccessToken = jwt.sign(
+                            {userId: userId, email: email},
+                            process.env.ACCESS_TOKEN_KEY, {
+                                expiresIn: '6hr' // expires in 2d
+                            }
+                        );
+                        newRefreshToken = jwt.sign(
+                            {userId: userId, email: email},
+                            process.env.REFRESH_TOKEN_KEY, {
+                                expiresIn: '30d' // expires in 2d
+                            }
+                        );
+                        req.accessToken = newAccessToken;
+                        req.refreshToken = newRefreshToken;
+                        next();
+                    } catch (err) {
+                        const error = new RequestError('Authentication flow failed, please try again later.', 500, err);
+                        return next(error);
                     }
-                );
-                newRefreshToken = jwt.sign(
-                    {userId: userId, email: email},
-                    process.env.JWT_KEY, {
-                        expiresIn: '30d' // expires in 2d
-                    }
-                );
-            } catch (err) {
-                const error = new RequestError('Authentication flow failed, please try again later.', 500, err);
-                return next(error);
+                }
             }
-            req.accessToken = newAccessToken;
-            req.refreshToken = newRefreshToken;
-            next();
         } else {
             const error = new RequestError('Authentication failed!', 403);
             return next(error);
