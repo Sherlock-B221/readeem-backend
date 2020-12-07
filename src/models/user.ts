@@ -1,9 +1,11 @@
 import * as mongoose from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator';
+import {IUser} from '../interfaces/user-interface';
 
 
 const UserSchema: mongoose.Schema = new mongoose.Schema({
     name: {type: String, required: true},
+    password:{type: String, required: true},
     completedBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     inProgressBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     favBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
@@ -21,4 +23,4 @@ const UserSchema: mongoose.Schema = new mongoose.Schema({
 
 UserSchema.plugin(uniqueValidator);
 
-export default mongoose.model("User", UserSchema);
+export default mongoose.model<IUser>("User", UserSchema);

@@ -1,5 +1,6 @@
 import * as mongoose from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator';
+import {IOrder} from "../interfaces/order-interface";
 
 
 const OrderSchema: mongoose.Schema = new mongoose.Schema({
@@ -7,8 +8,8 @@ const OrderSchema: mongoose.Schema = new mongoose.Schema({
     userId: {type: mongoose.Types.ObjectId, ref: 'User', required: true},
     orderDate: {type:Date,required:true},
     totalPrice: {type:Number,required: true}
-})
+});
 
 OrderSchema.plugin(uniqueValidator);
 
-export default mongoose.model("Order", OrderSchema);
+export default mongoose.model<IOrder>("Order", OrderSchema);

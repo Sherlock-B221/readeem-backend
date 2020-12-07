@@ -1,5 +1,6 @@
 import * as mongoose from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator';
+import {IItem} from "../interfaces/item-interface";
 
 
 const ItemSchema: mongoose.Schema = new mongoose.Schema({
@@ -15,4 +16,4 @@ const ItemSchema: mongoose.Schema = new mongoose.Schema({
 
 ItemSchema.plugin(uniqueValidator);
 
-export default mongoose.model("Item", ItemSchema);
+export default mongoose.model<IItem>("Item", ItemSchema);

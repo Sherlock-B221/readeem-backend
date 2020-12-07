@@ -1,18 +1,11 @@
 import * as mongoose from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator';
+import {IBook} from "../interfaces/book-interface";
 
 
 const BookSchema: mongoose.Schema = new mongoose.Schema({
     title: {type: String, required: true},
     bookMark: {type: Object, default: {}},
-// this is how bookMark would look, once populated: {
-//     "bookId": "2239",
-//     "href": "/OEBPS/ch06.xhtml",
-//     "created": 1539934158390,
-//     "locations": {
-//     "cfi": "epubcfi(/0!/4/4[simple_book]/2/2/6)"
-// }
-// }
     publishedDate: {type: Date, required: true},
     author: {type: String, required: true},
     cover: {
@@ -23,4 +16,4 @@ const BookSchema: mongoose.Schema = new mongoose.Schema({
 
 BookSchema.plugin(uniqueValidator);
 
-export default mongoose.model("Book", BookSchema);
+export default mongoose.model<IBook>("Book", BookSchema);
