@@ -7,6 +7,7 @@ import smtpTransport from 'nodemailer-smtp-transport';
 import RequestError from "../middlewares/request-error";
 
 import {validationResult} from "express-validator";
+import {validate} from "../utils/validate";
 
 const sendForgotPasswordMail = (code: string, email: string) => {
     let transporter = mailer.createTransport(smtpTransport({
@@ -37,18 +38,7 @@ const sendForgotPasswordMail = (code: string, email: string) => {
 
 // signUp
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        let params = "";
-        errors.array().forEach((e: any) => {
-            params += `${e.param}, `
-        });
-        params += "triggered the error!!";
-        return next(
-            new RequestError(params, 422)
-        );
-    }
+    validate(req,next);
     const {firstName, lastName, email, password, mobile, university} = req.body;
     let existingUser;
     try {
@@ -127,19 +117,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
 
 // login
 const login = async (req: Request, res: Response, next: NextFunction) => {
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        let params = "";
-        errors.array().forEach((e: any) => {
-            params += `${e.param}, `
-        });
-        params += "triggered the error!!";
-        return next(
-            new RequestError(params, 422)
-        );
-    }
-
+    validate(req,next);
     const {email, password} = req.body;
     let existingUser;
 
@@ -206,17 +184,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
 //todo: fix nodemailer
 const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        let params = "";
-        errors.array().forEach((e: any) => {
-            params += `${e.param}, `
-        });
-        params += "triggered the error!!";
-        return next(
-            new RequestError(params, 422)
-        );
-    }
+    validate(req,next);
     const email = req.body.email;
     console.log(email);
     let password = Math.random().toString().substring(0, 3) + Math.random().toString().slice(0, 3) + 'hult';
@@ -269,7 +237,6 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 };
 
 const changePassword = async (req: Request, res: Response, next: NextFunction) => {
-
     const userId = req.userData.userId;
     console.log(userId);
     let user;

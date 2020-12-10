@@ -23,7 +23,7 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
         }) != null;
         if (!tokenBlacklisted) {
             try {
-                const decodedAccessToken = jwt.verify(accessToken, process.env.JWT_KEY);
+                const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY);
                 req.userData = {
                     userId: (decodedAccessToken as DecodedToken).userId,
                     email: (decodedAccessToken as DecodedToken).email
@@ -32,7 +32,7 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
                 next();
             } catch (e) {
                 if (!refreshRevoked) {
-                    const decodedRefreshToken = jwt.verify(refreshToken, process.env.JWT_KEY);
+                    const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY);
                     await RefreshRevoked.create({refreshToken});
                     let userId = (decodedRefreshToken as DecodedToken).userId;
                     let email = (decodedRefreshToken as DecodedToken).email;
