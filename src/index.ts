@@ -6,6 +6,11 @@ import {ErrorWithCode} from "./interfaces/error_with_code";
 import express, {NextFunction, Request, Response} from 'express';
 
 import userRoutes from './routes/user-routes';
+import authRoutes from './routes/auth-routes';
+import itemRoutes from './routes/item-routes';
+import bookRoutes from './routes/book-routes';
+import orderRoutes from './routes/order-routes';
+
 import RequestError from './middlewares/request-error';
 
 const app = express();
@@ -13,7 +18,19 @@ const app = express();
 app.use(express.json());
 
 //Routes
-app.use('/user', userRoutes);
+app.use('/api/ping', express.Router().get('/', async (req: Request, res: Response, next: NextFunction) => {
+        res.json({
+            'status':'success',
+                'message': "Pinged!!!"
+            }
+        )
+    })
+);
+app.use('/api/auth', authRoutes);
+app.use('/api/order', orderRoutes);
+app.use('/api/item', itemRoutes);
+app.use('/api/book', bookRoutes);
+app.use('/api/user', userRoutes);
 
 
 //Unsupported Routes
