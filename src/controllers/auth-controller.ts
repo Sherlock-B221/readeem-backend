@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import {NextFunction, Request, Response} from 'express';
+import RefreshRevoked from '../models/refresh_revoke';
 import jwt from 'jsonwebtoken';
+import AccessBlackList from '../models/access_blacklist';
+
 import User from '../models/user';
 import RequestError from "../middlewares/request-error";
-
-import {validationResult} from "express-validator";
 import {validate} from "../utils/validate";
-import {sendMail} from "../utils/sendMail";
 // signUp
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
@@ -143,86 +143,91 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         return next(error);
     }
 
-    let token;
+    let accessToken, refreshToken;
     try {
-        token = jwt.sign(
-            {userId: existingUser.id, email: existingUser.email,},
-            process.env.JWT_KEY,
+        accessToken = jwt.sign(
+            {userId: existingUser.id, email: existingUser.email},
+            process.env.ACCESS_TOKEN_KEY, {
+                expiresIn: '6hr'
+            }
+        );
+        refreshToken = jwt.sign(
+            {userId: existingUser.id, email: existingUser.email},
+            process.env.REFRESH_TOKEN_KEY, {
+                expiresIn: '30d'
+            }
         );
     } catch (err) {
-        const error = new RequestError(
-            'Logging in failed, please try again later.',
-            500
-        );
+        const error = new RequestError('Logging in failed, please try again later.', 500, err);
         return next(error);
     }
-
     const existingUserObj = existingUser.toObject();
-    // Delete password from local existingUser variable to avoid sending it to the User.
     delete existingUserObj.password;
     await res.json({
         "status": "success",
         "user": existingUserObj,
-        "token": token
+        refreshToken: refreshToken,
+        accessToken: accessToken
     });
 };
 
-//todo: fix nodemailer
-const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
-    validate(req, next);
-    const email = req.body.email;
-    console.log(email);
-    let password = Math.random().toString().substring(0, 3) + Math.random().toString().slice(0, 3) + 'hult';
-    let user;
-    try {
-        user = await User.findOne({
-            email
-        });
-    } catch (err) {
-        const error = new RequestError("Something went wrong, please try again later.", err.status);
-        return next(error);
-    }
-    if (!user) {
-        const error = new RequestError(
-            'You are not registered!!!',
-            403
-        );
-        return next(error);
-    }
-    try {
-        await sendMail(password, email);
-    } catch (err) {
-        const error = new RequestError(
-            'Error in sending mail!!!',
-            500
-        );
-        return next(error);
-    }
-
-    let hashedPassword;
-    try {
-        hashedPassword = await bcrypt.hash(password, 12);
-    } catch (err) {
-        const error = new RequestError(
-            'Could not create user, please try again.',
-            500
-        );
-        return next(error);
-    }
-    user.password = hashedPassword;
-    try {
-        await user.save();
-    } catch (err) {
-        const error = new RequestError("Error saving user, try again later.", err.status);
-        return next(error);
-    }
-    res.status(200).json({
-        message: "Password updated"
-    });
-};
+// //todo: fix nodemailer
+// const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+//     validate(req, next);
+//     const email = req.body.email;
+//     console.log(email);
+//     let password = Math.random().toString().substring(0, 3) + Math.random().toString().slice(0, 3) + 'hult';
+//     let user;
+//     try {
+//         user = await User.findOne({
+//             email
+//         });
+//     } catch (err) {
+//         const error = new RequestError("Something went wrong, please try again later.", err.status);
+//         return next(error);
+//     }
+//     if (!user) {
+//         const error = new RequestError(
+//             'You are not registered!!!',
+//             403
+//         );
+//         return next(error);
+//     }
+//     try {
+//         await sendMail(password, email);
+//     } catch (err) {
+//         const error = new RequestError(
+//             'Error in sending mail!!!',
+//             500
+//         );
+//         return next(error);
+//     }
+//
+//     let hashedPassword;
+//     try {
+//         hashedPassword = await bcrypt.hash(password, 12);
+//     } catch (err) {
+//         const error = new RequestError(
+//             'Could not create user, please try again.',
+//             500
+//         );
+//         return next(error);
+//     }
+//     user.password = hashedPassword;
+//     try {
+//         await user.save();
+//     } catch (err) {
+//         const error = new RequestError("Error saving user, try again later.", err.status);
+//         return next(error);
+//     }
+//     res.status(200).json({
+//         message: "Password updated"
+//     });
+// };
 
 const changePassword = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.userData.userId;
+    const email = req.userData.email;
     console.log(userId);
     let user;
     try {
@@ -235,19 +240,8 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
         const error = new RequestError("Can't find user for provided id", 404);
         return next(error);
     }
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        let params = "";
-        errors.array().forEach((e: any) => {
-            params += `${e.param}, `
-        });
-        params += "triggered the error!!";
-        return next(
-            new RequestError(params, 422)
-        );
-    }
-    const newPassword = req.body.newPassword;
-    const currentPassword = req.body.currentPassword;
+    validate(req, next);
+    const {newPassword, currentPassword} = req.body;
     let isValidPassword = false;
     try {
         isValidPassword = await bcrypt.compare(currentPassword, user.password);
@@ -283,9 +277,52 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
         const error = new RequestError("Error saving user, try again later.", err.status);
         return next(error);
     }
+    try {
+        await RefreshRevoked.create({refreshToken: req.refreshToken});
+        await AccessBlackList.create({accessToken: req.accessToken});
 
+    } catch (err) {
+        const error = new RequestError("Error in changing password, try again later.", err.status);
+        return next(error);
+    }
+    let accessToken, refreshToken;
+    try {
+        accessToken = jwt.sign(
+            {userId: userId, email: email},
+            process.env.ACCESS_TOKEN_KEY, {
+                expiresIn: '6hr'
+            }
+        );
+        refreshToken = jwt.sign(
+            {userId: userId, email: email},
+            process.env.REFRESH_TOKEN_KEY, {
+                expiresIn: '30d'
+            }
+        );
+    } catch (err) {
+        const error = new RequestError('Signing up failed, please try again later.', 500, err);
+        return next(error);
+    }
     res.status(200).json({
-        message: "Password updated"
+        "status": "success",
+        message: "Password updated",
+        refreshToken: refreshToken,
+        accessToken: accessToken
+    });
+};
+
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await RefreshRevoked.create({refreshToken: req.refreshToken});
+        await AccessBlackList.create({accessToken: req.accessToken});
+
+    } catch (err) {
+        const error = new RequestError("Error in changing password, try again later.", err.status);
+        return next(error);
+    }
+    res.status(200).json({
+        "status": "success",
+        message: "Logged Out",
     });
 };
 
@@ -293,3 +330,4 @@ exports.forgotPassword = forgotPassword;
 exports.changePassword = changePassword;
 exports.signUp = signUp;
 exports.login = login;
+exports.logout = logout;
