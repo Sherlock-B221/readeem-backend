@@ -2,44 +2,15 @@ import bcrypt from "bcrypt";
 import {NextFunction, Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
-import mailer from 'nodemailer';
-import smtpTransport from 'nodemailer-smtp-transport';
 import RequestError from "../middlewares/request-error";
 
 import {validationResult} from "express-validator";
 import {validate} from "../utils/validate";
-
-const sendForgotPasswordMail = (code: string, email: string) => {
-    let transporter = mailer.createTransport(smtpTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        auth: {
-            user: process.env.EMAIL_NAME,
-            pass: process.env.EMAIL_PASS
-        }
-    }));
-
-    const mailOptions = {
-        from: process.env.EMAIL_NAME,
-        to: email,
-        subject: '',
-        text: `${code} 
-        Use this as a temporary password, please change it when you login. 
-        We will not be responsible if it is leaked.`
-    };
-    transporter.sendMail(mailOptions, function (error: Error) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log("Mail sent");
-        }
-    });
-}
-
+import {sendMail} from "../utils/sendMail";
 // signUp
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
-    validate(req,next);
-    const {firstName, lastName, email, password, mobile, university} = req.body;
+    validate(req, next);
+    const {name, email, password, mobile} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -60,31 +31,34 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         const error = new RequestError('Could not create user, please try again.', 500, err);
         return next(error);
     }
-    const date = Date().toLocaleString();
-
+    const joinDate = Date().toLocaleString();
 
     let filePath;
     try {
         if (req.file) {
             filePath = req.file.path;
         } else {
-            filePath = 'uploads/images/DUser.jpeg'
+            filePath = 'uploads/images/DUser.png'
         }
     } catch (err) {
         console.log(err);
         const error = new RequestError(err.message, err.code, err);
         return next(error);
     }
-
+//TODO: change url
     const createdUser = new User({
-        firstName,
-        lastName,
-        email: email,
-        image: 'https://win75.herokuapp.com/' + filePath,
-        password: hashedPassword,
+        name,
+        email,
         mobile,
-        university,
-        joinDate: date,
+        joinDate,
+        img: 'https://win75.herokuapp.com/' + filePath,
+        password: hashedPassword,
+        completedBooks: [],
+        inProgressBooks: [],
+        favBooks: [],
+        cart: [],
+        reward: 0,
+        previousOrders: [],
     });
     try {
         await createdUser.save();
@@ -93,12 +67,18 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         return next(error);
     }
 
-    let token;
+    let accessToken, refreshToken;
     try {
-        token = jwt.sign(
+        accessToken = jwt.sign(
             {userId: createdUser.id, email: createdUser.email},
-            process.env.JWT_KEY, {
-                expiresIn: '2d' // expires in 2d
+            process.env.ACCESS_TOKEN_KEY, {
+                expiresIn: '6hr'
+            }
+        );
+        refreshToken = jwt.sign(
+            {userId: createdUser.id, email: createdUser.email},
+            process.env.REFRESH_TOKEN_KEY, {
+                expiresIn: '30d'
             }
         );
     } catch (err) {
@@ -112,12 +92,17 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
 
     await res
         .status(201)
-        .json({"status": "success", user: createdUserObj, email: createdUserObj.email, token: token});
+        .json({
+            "status": "success",
+            user: createdUserObj,
+            refreshToken: refreshToken,
+            accessToken: accessToken
+        });
 };
 
 // login
 const login = async (req: Request, res: Response, next: NextFunction) => {
-    validate(req,next);
+    validate(req, next);
     const {email, password} = req.body;
     let existingUser;
 
@@ -184,7 +169,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
 //todo: fix nodemailer
 const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
-    validate(req,next);
+    validate(req, next);
     const email = req.body.email;
     console.log(email);
     let password = Math.random().toString().substring(0, 3) + Math.random().toString().slice(0, 3) + 'hult';
@@ -205,7 +190,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
         return next(error);
     }
     try {
-        await sendForgotPasswordMail(password, email);
+        await sendMail(password, email);
     } catch (err) {
         const error = new RequestError(
             'Error in sending mail!!!',
