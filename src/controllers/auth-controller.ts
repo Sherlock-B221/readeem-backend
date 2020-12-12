@@ -7,8 +7,11 @@ import AccessBlackList from '../models/access_blacklist';
 import User from '../models/user';
 import RequestError from "../middlewares/request-error";
 import {validate} from "../utils/validate";
-// signUp
-const signUp = async (req: Request, res: Response, next: NextFunction) => {
+import {sendMail} from "../utils/send-mail";
+
+export const signUp = async (req: Request, res: Response, next: NextFunction) => {
+    console.log('bb');
+    console.log(req.body);
     validate(req, next);
     const {name, email, password, mobile} = req.body;
     let existingUser;
@@ -56,6 +59,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         completedBooks: [],
         inProgressBooks: [],
         favBooks: [],
+        changePasswordDate: joinDate,
         cart: [],
         reward: 0,
         previousOrders: [],
@@ -70,13 +74,21 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     let accessToken, refreshToken;
     try {
         accessToken = jwt.sign(
-            {userId: createdUser.id, email: createdUser.email},
+            {
+                userId: createdUser.id,
+                email: createdUser.email,
+                changePasswordDate: createdUser.changePasswordDate
+            },
             process.env.ACCESS_TOKEN_KEY, {
                 expiresIn: '6hr'
             }
         );
         refreshToken = jwt.sign(
-            {userId: createdUser.id, email: createdUser.email},
+            {
+                userId: createdUser.id,
+                email: createdUser.email,
+                changePasswordDate: createdUser.changePasswordDate
+            },
             process.env.REFRESH_TOKEN_KEY, {
                 expiresIn: '30d'
             }
@@ -100,8 +112,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         });
 };
 
-// login
-const login = async (req: Request, res: Response, next: NextFunction) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
     const {email, password} = req.body;
     let existingUser;
@@ -146,13 +157,21 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     let accessToken, refreshToken;
     try {
         accessToken = jwt.sign(
-            {userId: existingUser.id, email: existingUser.email},
+            {
+                userId: existingUser.id,
+                email: existingUser.email,
+                changePasswordDate: existingUser.changePasswordDate
+            },
             process.env.ACCESS_TOKEN_KEY, {
                 expiresIn: '6hr'
             }
         );
         refreshToken = jwt.sign(
-            {userId: existingUser.id, email: existingUser.email},
+            {
+                userId: existingUser.id,
+                email: existingUser.email,
+                changePasswordDate: existingUser.changePasswordDate
+            },
             process.env.REFRESH_TOKEN_KEY, {
                 expiresIn: '30d'
             }
@@ -171,61 +190,61 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-// //todo: fix nodemailer
-// const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
-//     validate(req, next);
-//     const email = req.body.email;
-//     console.log(email);
-//     let password = Math.random().toString().substring(0, 3) + Math.random().toString().slice(0, 3) + 'hult';
-//     let user;
-//     try {
-//         user = await User.findOne({
-//             email
-//         });
-//     } catch (err) {
-//         const error = new RequestError("Something went wrong, please try again later.", err.status);
-//         return next(error);
-//     }
-//     if (!user) {
-//         const error = new RequestError(
-//             'You are not registered!!!',
-//             403
-//         );
-//         return next(error);
-//     }
-//     try {
-//         await sendMail(password, email);
-//     } catch (err) {
-//         const error = new RequestError(
-//             'Error in sending mail!!!',
-//             500
-//         );
-//         return next(error);
-//     }
-//
-//     let hashedPassword;
-//     try {
-//         hashedPassword = await bcrypt.hash(password, 12);
-//     } catch (err) {
-//         const error = new RequestError(
-//             'Could not create user, please try again.',
-//             500
-//         );
-//         return next(error);
-//     }
-//     user.password = hashedPassword;
-//     try {
-//         await user.save();
-//     } catch (err) {
-//         const error = new RequestError("Error saving user, try again later.", err.status);
-//         return next(error);
-//     }
-//     res.status(200).json({
-//         message: "Password updated"
-//     });
-// };
+//todo: fix nodemailer
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    validate(req, next);
+    const {email} = req.body;
+    let user;
+    try {
+        user = await User.findOne({
+            email
+        });
+    } catch (err) {
+        const error = new RequestError("Something went wrong, please try again later.", err.status);
+        return next(error);
+    }
+    if (!user) {
+        const error = new RequestError(
+            'You are not registered!!!',
+            403
+        );
+        return next(error);
+    }
+    let token;
+    try {
+        token = jwt.sign(
+            {
+                email: email,
+            },
+            process.env.FORGET_PASSWORD_TOKEN_KEY, {
+                expiresIn: '5m'
+            }
+        );
+    } catch (err) {
+        const error = new RequestError(
+            'Reset password flow failed, try again later!!!',
+            403
+        );
+        return next(error);
+    }
+    try {
+        await sendMail(token, email);
+    } catch (err) {
+        const error = new RequestError(
+            'Error in sending mail!!!',
+            500
+        );
+        return next(error);
+    }
 
-const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    res.status(200).json({
+        "status": "success",
+        message: "Reset Link Sent"
+    });
+
+};
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.userData.userId;
     const email = req.userData.email;
     console.log(userId);
@@ -271,6 +290,7 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
         return next(error);
     }
     user.password = hashedPassword;
+    user.changePasswordDate = new Date();
     try {
         await user.save();
     } catch (err) {
@@ -288,13 +308,21 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
     let accessToken, refreshToken;
     try {
         accessToken = jwt.sign(
-            {userId: userId, email: email},
+            {
+                userId: userId,
+                email: email,
+                changePasswordDate: user.changePasswordDate
+            },
             process.env.ACCESS_TOKEN_KEY, {
                 expiresIn: '6hr'
             }
         );
         refreshToken = jwt.sign(
-            {userId: userId, email: email},
+            {
+                userId: userId,
+                email: email,
+                changePasswordDate: user.changePasswordDate
+            },
             process.env.REFRESH_TOKEN_KEY, {
                 expiresIn: '30d'
             }
@@ -311,7 +339,55 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
     });
 };
 
-const logout = async (req: Request, res: Response, next: NextFunction) => {
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    let token;
+    try{
+        token = jwt.verify(req.body.token, process.env.FORGET_PASSWORD_TOKEN_KEY);
+    }catch(e){
+        const error = new RequestError(
+            'Link Expired!!!',
+            401
+        );
+        return next(error);
+    }
+    let user;
+    try {
+        user = await User.findOne({email: (token as { email: string }).email})
+    } catch (err) {
+        const error = new RequestError("Something went wrong can't get user.", 500);
+        return next(error);
+    }
+    if (!user) {
+        const error = new RequestError("Can't find user for provided id", 404);
+        return next(error);
+    }
+    validate(req, next);
+    const {newPassword} = req.body;
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(newPassword, 12);
+    } catch (err) {
+        const error = new RequestError(
+            'Could not reset password, please try again.',
+            500
+        );
+        return next(error);
+    }
+    user.password = hashedPassword;
+    user.changePasswordDate = new Date();
+    try {
+        await user.save();
+    } catch (err) {
+        const error = new RequestError("Error saving user, try again later.", err.status);
+        return next(error);
+    }
+    res.status(200).json({
+        "status": "success",
+        message: "Password Reset Successful!!!",
+    });
+};
+
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
         await RefreshRevoked.create({refreshToken: req.refreshToken});
         await AccessBlackList.create({accessToken: req.accessToken});
@@ -325,9 +401,3 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
         message: "Logged Out",
     });
 };
-
-exports.forgotPassword = forgotPassword;
-exports.changePassword = changePassword;
-exports.signUp = signUp;
-exports.login = login;
-exports.logout = logout;

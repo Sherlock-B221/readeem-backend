@@ -9,13 +9,10 @@ export const getUsers: RequestHandler = async (req: Request, res: Response, next
 export const getUserById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 };
 
-export const signUp: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const dummyRoute: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     res.json({
         "status": "TS works bitch"
     });
-};
-
-export const login: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const editUser: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
