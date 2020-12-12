@@ -10,6 +10,7 @@ export interface IUser extends Document {
     inProgressBooks: Array<IBook['_id']>,
     favBooks: Array<IBook['_id']>,
     joinDate: Date,
+    changePasswordDate: Date,
     cart: Array<IItem['_id']>,
     reward: number,
     previousOrders: Array<IOrder['_id']>,

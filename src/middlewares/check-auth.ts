@@ -24,35 +24,59 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
         if (!tokenBlacklisted) {
             try {
                 const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY);
+                const changePasswordDate = (decodedAccessToken as DecodedToken).changePasswordDate;
                 req.userData = {
                     userId: (decodedAccessToken as DecodedToken).userId,
-                    email: (decodedAccessToken as DecodedToken).email
+                    email: (decodedAccessToken as DecodedToken).email,
+                    changePasswordDate: changePasswordDate
                 };
+                const iat = (decodedAccessToken as DecodedToken).iat;
+                // checking this to discard the tokens created before password change/forget event.
+                if (iat.getTime() < changePasswordDate.getTime()) {
+                    const error = new RequestError('Access Token Expired!!!', 403);
+                    return next(error);
+                }
                 req.isAccessTokenValid = true;
                 next();
             } catch (e) {
                 if (!refreshRevoked) {
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY);
+                    const iat = (decodedRefreshToken as DecodedToken).iat;
+                    const changePasswordDate = (decodedRefreshToken as DecodedToken).changePasswordDate;
+                    // checking this to discard the tokens created before password change/forget event.
+                    if (iat.getTime() < changePasswordDate.getTime()) {
+                        const error = new RequestError('Refresh Token Expired!!!', 403);
+                        return next(error);
+                    }
                     await RefreshRevoked.create({refreshToken});
                     let userId = (decodedRefreshToken as DecodedToken).userId;
                     let email = (decodedRefreshToken as DecodedToken).email;
                     req.userData = {
                         userId,
-                        email
+                        email,
+                        changePasswordDate
                     };
                     req.isAccessTokenValid = false;
                     let newAccessToken, newRefreshToken;
                     try {
                         newAccessToken = jwt.sign(
-                            {userId: userId, email: email},
+                            {
+                                userId: userId,
+                                email: email,
+                                changePasswordDate: changePasswordDate
+                            },
                             process.env.ACCESS_TOKEN_KEY, {
                                 expiresIn: '6hr' // expires in 2d
                             }
                         );
                         newRefreshToken = jwt.sign(
-                            {userId: userId, email: email},
+                            {
+                                userId: userId,
+                                email: email,
+                                changePasswordDate: changePasswordDate
+                            },
                             process.env.REFRESH_TOKEN_KEY, {
-                                expiresIn: '30d' // expires in 2d
+                                expiresIn: '30d' // expires in 30d
                             }
                         );
                         req.accessToken = newAccessToken;
