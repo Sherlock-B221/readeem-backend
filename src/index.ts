@@ -1,5 +1,4 @@
-require('dotenv').config();
-
+import mongoose from "mongoose";
 import * as fs from "fs";
 import {ErrorWithCode} from "./interfaces/error_with_code";
 
@@ -13,6 +12,8 @@ import orderRoutes from './routes/order-routes';
 
 import RequestError from './middlewares/request-error';
 
+require('dotenv').config();
+
 const app = express();
 
 app.use(express.json());
@@ -20,7 +21,7 @@ app.use(express.json());
 //Routes
 app.use('/api/ping', express.Router().get('/', async (req: Request, res: Response, next: NextFunction) => {
         res.json({
-            'status':'success',
+                'status': 'success',
                 'message': "Pinged!!!"
             }
         )
@@ -55,6 +56,19 @@ app.use((error: ErrorWithCode, req: Request, res: Response, next: NextFunction) 
     });
 });
 
-app.listen(process.env.PORT || process.env.SV_PORT, function () {
-    console.log("Started server on Port", process.env.PORT);
-})
+mongoose
+    .connect(
+        `mongodb+srv://admin101:abcdpart3@cluster0-hacwi.mongodb.net/brusqueDB`, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true
+        }
+    )
+    .then(() => {
+        app.listen(process.env.PORT || process.env.SV_PORT, () => {
+            console.log("Started server on Port", process.env.PORT);
+        });
+    })
+    .catch(err => {
+        console.log(err);
+    });

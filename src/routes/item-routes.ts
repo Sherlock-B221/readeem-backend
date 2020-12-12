@@ -1,6 +1,6 @@
 import * as express from 'express';
 import {check} from 'express-validator';
-import {signUp} from '../controllers/user-controller.js'
+import {dummyRoute} from '../controllers/user-controller.js'
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ router.post('/addUserToDb'
         check('email')
             .isEmail(),
     ]
-    , signUp
+    , dummyRoute
 );
 
 

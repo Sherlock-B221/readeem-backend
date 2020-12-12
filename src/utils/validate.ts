@@ -6,6 +6,7 @@ import {NextFunction, Request} from 'express';
 export const validate = (req: Request, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.log(errors);
         let params = "";
         errors.array().forEach((e: ValidationError) => {
             params += `${e.param}, `
