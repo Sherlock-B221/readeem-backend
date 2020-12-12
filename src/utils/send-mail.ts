@@ -1,7 +1,7 @@
 import mailer from "nodemailer";
 import smtpTransport from "nodemailer-smtp-transport";
 
-export const sendMail = (code: string, email: string) => {
+export const sendMail = (link: string, email: string) => {
     let transporter = mailer.createTransport(smtpTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
@@ -15,9 +15,11 @@ export const sendMail = (code: string, email: string) => {
         from: process.env.EMAIL_NAME,
         to: email,
         subject: '',
-        text: `${code} 
-        Use this as a temporary password, please change it when you login. 
-        We will not be responsible if it is leaked.`
+        text: `${link} 
+        This Link will expire in 10 mins, please don't share it.
+        Regards,
+        Team READeem
+        `
     };
     transporter.sendMail(mailOptions, function (error: Error) {
         if (error) {

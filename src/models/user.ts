@@ -1,15 +1,16 @@
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator';
 import {IUser} from '../interfaces/user-interface';
 
 
 const UserSchema: mongoose.Schema = new mongoose.Schema({
     name: {type: String, required: true},
-    password:{type: String, required: true},
+    password: {type: String, required: true},
     completedBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     inProgressBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     favBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     joinDate: {type: Date, required: true},
+    changePasswordDate: {type: Date},
     cart: [{type: mongoose.Types.ObjectId, ref: 'Item'}],
     reward: {type: Number, default: 0},
     previousOrders: [{type: mongoose.Types.ObjectId, ref: 'Order'}],

@@ -1,4 +1,4 @@
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator';
 import {IBook} from "../interfaces/book-interface";
 

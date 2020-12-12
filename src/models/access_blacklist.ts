@@ -1,4 +1,4 @@
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 
 const AccessBlackListSchema: mongoose.Schema = new mongoose.Schema({
     accessToken: {type: String, required: true},
