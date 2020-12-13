@@ -5,7 +5,7 @@ import RefreshRevoked from '../models/refresh_revoke';
 import {NextFunction, Request, Response} from 'express';
 import {DecodedToken} from "../interfaces/decoded_token";
 
-module.exports = async (req: Request, res: Response, next: NextFunction) => {
+const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'OPTIONS') {
         return next();
     }
@@ -97,3 +97,5 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
         return next(error);
     }
 };
+
+export default checkAuth;

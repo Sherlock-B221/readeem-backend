@@ -238,12 +238,10 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
         );
         return next(error);
     }
-
     res.status(200).json({
         "status": "success",
         message: "Reset Link Sent"
     });
-
 };
 
 export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
