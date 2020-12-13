@@ -1,6 +1,6 @@
 declare module Express {
     interface Request {
-        file?: any;
+        file: Multer.File;
         userData?: {
             userId: string;
             email:string;
