@@ -20,7 +20,7 @@ class RequestError implements ErrorWithCode {
                 + currentDate.getSeconds();
 
             console.log(`The following error occurred on ${datetime}:`);
-            console.log(err.message);
+            console.log(err);
             console.log("error->catch");
             console.log("\n")
         }

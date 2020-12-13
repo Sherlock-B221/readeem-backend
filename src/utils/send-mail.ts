@@ -1,7 +1,9 @@
 import mailer from "nodemailer";
 import smtpTransport from "nodemailer-smtp-transport";
+import RequestError from "../middlewares/request-error";
+import {NextFunction} from "express";
 
-export const sendMail = (link: string, email: string) => {
+export const sendMail = async (link: string, email: string, next: NextFunction) => {
     let transporter = mailer.createTransport(smtpTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
@@ -21,11 +23,11 @@ export const sendMail = (link: string, email: string) => {
         Team READeem
         `
     };
-    transporter.sendMail(mailOptions, function (error: Error) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log("Mail sent");
-        }
-    });
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.log(error);
+        console.log("bb");
+        throw new RequestError('Authentication failed! Access and Refresh Tokens does not exist', 401);
+    }
 }

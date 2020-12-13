@@ -227,8 +227,10 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
         );
         return next(error);
     }
+    token = 'http://localhost:3000/forget-password/' + token;
+    console.log(token);
     try {
-        await sendMail(token, email);
+        await sendMail(token, email, next);
     } catch (err) {
         const error = new RequestError(
             'Error in sending mail!!!',
@@ -341,9 +343,9 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 
 export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     let token;
-    try{
+    try {
         token = jwt.verify(req.body.token, process.env.FORGET_PASSWORD_TOKEN_KEY);
-    }catch(e){
+    } catch (e) {
         const error = new RequestError(
             'Link Expired!!!',
             401

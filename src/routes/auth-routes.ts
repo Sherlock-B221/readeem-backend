@@ -1,6 +1,6 @@
 import * as express from 'express';
 import {body, check} from 'express-validator';
-import {login, signUp} from '../controllers/auth-controller.js'
+import {forgotPassword, login, signUp} from '../controllers/auth-controller.js'
 import {fileUpload} from "../middlewares/file-upload";
 
 const router = express.Router();
@@ -21,6 +21,7 @@ router.post('/signUp'
     ]
     , signUp
 );
+
 router.post('/login'
     , [
         body('email')
@@ -30,6 +31,16 @@ router.post('/login'
     ]
     , login
 );
+
+router.post('/forgotPassword',
+    [
+        body('email')
+            .not().isEmpty().normalizeEmail()
+            .isEmail(),
+    ],
+    forgotPassword
+);
+
 
 
 export default router;
