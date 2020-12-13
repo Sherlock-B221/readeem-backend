@@ -10,10 +10,8 @@ import {validate} from "../utils/validate";
 import {sendMail} from "../utils/send-mail";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
-    console.log('bb');
-    console.log(req.body);
     validate(req, next);
-    const {name, email, password, mobile} = req.body;
+    const {name, email, password, mobile, imgUrl} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -35,26 +33,30 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         return next(error);
     }
     const joinDate = Date().toLocaleString();
-
-    let filePath;
-    try {
-        if (req.file) {
-            filePath = req.file.path;
-        } else {
-            filePath = 'uploads/images/DUser.png'
+    let finalImageUrl;
+    if (!imgUrl) {
+        let filePath;
+        try {
+            if (req.file) {
+                filePath = req.file.path;
+            } else {
+                filePath = 'uploads/images/DUser.png'
+            }
+        } catch (err) {
+            console.log(err);
+            const error = new RequestError(err.message, err.code, err);
+            return next(error);
         }
-    } catch (err) {
-        console.log(err);
-        const error = new RequestError(err.message, err.code, err);
-        return next(error);
+        finalImageUrl = 'https://win75.herokuapp.com/' + filePath;
     }
+    finalImageUrl = imgUrl;
 //TODO: change url
     const createdUser = new User({
         name,
         email,
         mobile,
         joinDate,
-        img: 'https://win75.herokuapp.com/' + filePath,
+        img: finalImageUrl,
         password: hashedPassword,
         completedBooks: [],
         inProgressBooks: [],
