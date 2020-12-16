@@ -8,9 +8,10 @@ const router = express.Router();
 
 router.post('/signUp'
     , [
-        check('name')
+        body('name')
             .not()
             .isEmpty(),
+        body('isThirdParty').not().isEmpty(),
         body('mobile')
             .not()
             .isEmpty(),

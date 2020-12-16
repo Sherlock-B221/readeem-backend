@@ -66,7 +66,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                                 changePasswordDate: changePasswordDate
                             },
                             process.env.ACCESS_TOKEN_KEY, {
-                                expiresIn: '6hr' // expires in 2d
+                                expiresIn: '6hr' // expires in 6 hours
                             }
                         );
                         newRefreshToken = jwt.sign(
@@ -89,7 +89,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                 }
             }
         } else {
-            const error = new RequestError('Authentication failed!', 403);
+            const error = new RequestError('Authentication failed!', 401);
             return next(error);
         }
     } catch (err) {

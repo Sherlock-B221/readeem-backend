@@ -1,16 +1,13 @@
 import * as express from 'express';
-import {check} from 'express-validator';
-import {dummyRoute} from '../controllers/user-controller.js'
+import {editUser, getUserById, getUsers} from '../controllers/user-controller.js'
+import checkAuth from "../middlewares/check-auth";
 
 const router = express.Router();
 
-router.post('/addUserToDb'
-    , [
-        check('email')
-            .isEmail(),
-    ]
-    , dummyRoute
-);
+router.get('/get', getUsers);
 
+router.get('/get/:id', getUserById);
+
+router.patch('/patch/:id',checkAuth ,editUser);
 
 export default router;
