@@ -11,11 +11,12 @@ const UserSchema: mongoose.Schema = new mongoose.Schema({
     favBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     joinDate: {type: Date, required: true},
     changePasswordDate: {type: Date},
+    isThirdParty: {type: Boolean, required: true},
     cart: [{type: mongoose.Types.ObjectId, ref: 'Item'}],
     reward: {type: Number, default: 0},
     previousOrders: [{type: mongoose.Types.ObjectId, ref: 'Order'}],
     email: {type: String, required: true, unique: true,},
-    mobile: {type: Number, required: true, minlength: 10},
+    mobile: {type: String, required: true, minlength: 10},
     img: {
         type: String,
         default: "https://www.cmcaindia.org/wp-content/uploads/2015/11/default-profile-picture-gmail-2.png"

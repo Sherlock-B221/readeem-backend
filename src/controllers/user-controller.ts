@@ -17,8 +17,3 @@ export const dummyRoute: RequestHandler = async (req: Request, res: Response, ne
 
 export const editUser: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 };
-
-export const deleteUser: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-};
-
-
