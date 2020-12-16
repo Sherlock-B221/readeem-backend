@@ -11,7 +11,7 @@ import {sendMail} from "../utils/send-mail";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const {name, email, password, mobile, imgUrl} = req.body;
+    const {name, email, isThirdParty, password, mobile, imgUrl} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -24,13 +24,14 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         const error = new RequestError('User exists already, please login instead.', 422);
         return next(error);
     }
-
-    let hashedPassword;
-    try {
-        hashedPassword = await bcrypt.hash(password, 12);
-    } catch (err) {
-        const error = new RequestError('Could not create user, please try again.', 500, err);
-        return next(error);
+    let hashedPassword = '';
+    if (isThirdParty) {
+        try {
+            hashedPassword = await bcrypt.hash(password, 12);
+        } catch (err) {
+            const error = new RequestError('Could not create user, please try again.', 500, err);
+            return next(error);
+        }
     }
     const joinDate = Date().toLocaleString();
     let finalImageUrl;
@@ -40,7 +41,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
             if (req.file) {
                 filePath = req.file.path;
             } else {
-                filePath = 'uploads/images/DUser.png'
+                filePath = 'uploads/images/DUser.png';
             }
         } catch (err) {
             console.log(err);
@@ -55,6 +56,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         name,
         email,
         mobile,
+        isThirdParty,
         joinDate,
         img: finalImageUrl,
         password: hashedPassword,
