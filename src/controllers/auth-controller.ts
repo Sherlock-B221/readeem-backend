@@ -11,7 +11,7 @@ import {sendMail} from "../utils/send-mail";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const {name, email, isThirdParty, password, mobile, imgUrl} = req.body;
+    const {name, email, password, mobile,} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -25,40 +25,34 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         return next(error);
     }
     let hashedPassword = '';
-    if (isThirdParty) {
-        try {
-            hashedPassword = await bcrypt.hash(password, 12);
-        } catch (err) {
-            const error = new RequestError('Could not create user, please try again.', 500, err);
-            return next(error);
-        }
+    try {
+        hashedPassword = await bcrypt.hash(password, 12);
+    } catch (err) {
+        const error = new RequestError('Could not create user, please try again.', 500, err);
+        return next(error);
     }
     const joinDate = Date().toLocaleString();
-    let finalImageUrl;
-    if (!imgUrl) {
-        let filePath;
-        try {
-            if (req.file) {
-                filePath = req.file.path;
-            } else {
-                filePath = 'uploads/images/DUser.png';
-            }
-        } catch (err) {
-            console.log(err);
-            const error = new RequestError(err.message, err.code, err);
-            return next(error);
+    let filePath;
+    try {
+        if (req.file) {
+            filePath = req.file.path;
+        } else {
+            filePath = 'uploads/images/DUser.png';
         }
-        finalImageUrl = 'https://win75.herokuapp.com/' + filePath;
+    } catch (err) {
+        console.log(err);
+        const error = new RequestError(err.message, err.code, err);
+        return next(error);
     }
-    finalImageUrl = imgUrl;
+    filePath = 'https://win75.herokuapp.com/' + filePath;
 //TODO: change url
     const createdUser = new User({
         name,
         email,
         mobile,
-        isThirdParty,
+        isThirdParty: false,
         joinDate,
-        img: finalImageUrl,
+        img: filePath,
         password: hashedPassword,
         completedBooks: [],
         inProgressBooks: [],
