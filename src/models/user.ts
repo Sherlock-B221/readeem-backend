@@ -20,7 +20,8 @@ const UserSchema: mongoose.Schema = new mongoose.Schema({
     img: {
         type: String,
         default: "https://www.cmcaindia.org/wp-content/uploads/2015/11/default-profile-picture-gmail-2.png"
-    }
+    },
+    imgHash: {type: String, default: 'LFOWvnof00j[00ayD%ay~qfQ?bj['}
 });
 
 UserSchema.plugin(uniqueValidator);

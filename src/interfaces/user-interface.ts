@@ -17,5 +17,6 @@ export interface IUser extends Document {
     previousOrders: Array<IOrder['_id']>,
     email: string,
     mobile: string,
-    img: string
+    img: string,
+    imgHash: string
 }
