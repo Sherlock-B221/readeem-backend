@@ -11,7 +11,7 @@ import {sendMail} from "../utils/send-mail";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const {name, email, password, mobile,} = req.body;
+    const {name, email, password, mobile,imgHash} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -50,6 +50,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         name,
         email,
         mobile,
+        imgHash,
         isThirdParty: false,
         joinDate,
         img: filePath,
