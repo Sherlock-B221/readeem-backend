@@ -58,7 +58,7 @@ app.use((error: ErrorWithCode, req: Request, res: Response, next: NextFunction) 
 
 mongoose
     .connect(
-        `mongodb+srv://admin101:abcdpart3@cluster0-hacwi.mongodb.net/brusqueDB`, {
+        `mongodb+srv://admin:iamadmin@cluster0.eqegx.mongodb.net/MyOwn?retryWrites=true&w=majority`, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true
