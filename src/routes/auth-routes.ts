@@ -23,7 +23,7 @@ router.post('/signUp'
         body('mobile')
             .not()
             .isEmpty(),
-        body('imgHash').not().isEmpty,
+        body('imgHash').not().isEmpty(),
         body('email')
             .normalizeEmail()
             .isEmail(),
@@ -44,8 +44,8 @@ router.post('/thirdParty'
         body('email')
             .normalizeEmail()
             .isEmail(),
-        body('img').not().isEmpty,
-        body('imgHash').not().isEmpty,
+        body('img').not().isEmpty(),
+        body('imgHash').not().isEmpty(),
     ]
     , thirdPartyAuth
 );
@@ -93,7 +93,7 @@ router.post('/resetPassword',
     resetPassword
 );
 
-router.get('/logout',
+router.post('/logout',
     checkAuth,
     logout
 );

@@ -66,7 +66,7 @@ mongoose
     )
     .then(() => {
         app.listen(process.env.PORT || process.env.SV_PORT, () => {
-            console.log("Started server on Port", process.env.PORT);
+            console.log("Started server on Port", process.env.SV_PORT);
         });
     })
     .catch(err => {
