@@ -53,6 +53,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         mobile,
         imgHash,
         isThirdParty: false,
+        isBoth: false,
         joinDate,
         img: filePath,
         password: hashedPassword,
@@ -71,45 +72,23 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         return next(error);
     }
 
-    let accessToken, refreshToken;
     try {
-        accessToken = jwt.sign(
-            {
-                userId: createdUser.id,
-                email: createdUser.email,
-                changePasswordDate: createdUser.changePasswordDate
-            },
-            process.env.ACCESS_TOKEN_KEY, {
-                expiresIn: '6hr'
-            }
-        );
-        refreshToken = jwt.sign(
-            {
-                userId: createdUser.id,
-                email: createdUser.email,
-                changePasswordDate: createdUser.changePasswordDate
-            },
-            process.env.REFRESH_TOKEN_KEY, {
-                expiresIn: '30d'
-            }
-        );
-    } catch (err) {
-        const error = new RequestError('Signing up failed, please try again later.', 500, err);
+        const {refreshToken, accessToken} = getTokens(createdUser.id, createdUser.email, createdUser.changePasswordDate);
+        let createdUserObj = createdUser.toObject();
+        delete createdUserObj.password;
+        await res
+            .status(201)
+            .json({
+                "status": "success",
+                user: createdUserObj,
+                refreshToken: refreshToken,
+                accessToken: accessToken
+            });
+    } catch (e) {
+        const error = new RequestError('An error occurred, please try again later.', 422);
         return next(error);
     }
 
-    // Delete password from local createdUser variable to avoid sending it to the User.
-    let createdUserObj = createdUser.toObject();
-    delete createdUserObj.password;
-
-    await res
-        .status(201)
-        .json({
-            "status": "success",
-            user: createdUserObj,
-            refreshToken: refreshToken,
-            accessToken: accessToken
-        });
 };
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
@@ -154,40 +133,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         return next(error);
     }
 
-    let accessToken, refreshToken;
     try {
-        accessToken = jwt.sign(
-            {
-                userId: existingUser.id,
-                email: existingUser.email,
-                changePasswordDate: existingUser.changePasswordDate
-            },
-            process.env.ACCESS_TOKEN_KEY, {
-                expiresIn: '6hr'
-            }
-        );
-        refreshToken = jwt.sign(
-            {
-                userId: existingUser.id,
-                email: existingUser.email,
-                changePasswordDate: existingUser.changePasswordDate
-            },
-            process.env.REFRESH_TOKEN_KEY, {
-                expiresIn: '30d'
-            }
-        );
-    } catch (err) {
-        const error = new RequestError('Logging in failed, please try again later.', 500, err);
+        const {refreshToken, accessToken} = getTokens(existingUser.id, existingUser.email, existingUser.changePasswordDate);
+        const existingUserObj = existingUser.toObject();
+        delete existingUserObj.password;
+        await res.json({
+            "status": "success",
+            "user": existingUserObj,
+            refreshToken: refreshToken,
+            accessToken: accessToken
+        });
+    } catch (e) {
+        const error = new RequestError('An error occurred, please try again later.', 422);
         return next(error);
     }
-    const existingUserObj = existingUser.toObject();
-    delete existingUserObj.password;
-    await res.json({
-        "status": "success",
-        "user": existingUserObj,
-        refreshToken: refreshToken,
-        accessToken: accessToken
-    });
 };
 
 export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunction) => {
@@ -228,7 +187,8 @@ export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunc
         email,
         mobile,
         imgHash,
-        isThirdParty: false,
+        isThirdParty: true,
+        isBoth: false,
         joinDate,
         img: imgUrl,
         password: "",
@@ -258,6 +218,43 @@ export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunc
             refreshToken: refreshToken,
             accessToken: accessToken
         });
+};
+
+export const addPasswordToUser = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.userData.userId;
+    let user;
+    try {
+        user = await User.findById(userId)
+    } catch (err) {
+        const error = new RequestError("Something went wrong can't get user.", 500);
+        return next(error);
+    }
+    if (!user) {
+        const error = new RequestError("Can't find user for provided id", 404);
+        return next(error);
+    }
+    validate(req, next);
+    const {password} = req.body;
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(password, 12);
+    } catch (err) {
+        const error = new RequestError(
+            'Could not add password, please try again.',
+            500
+        );
+        return next(error);
+    }
+    user.password = hashedPassword;
+    user.changePasswordDate = new Date();
+    user.isBoth = true;
+    try {
+        await user.save();
+    } catch (err) {
+        const error = new RequestError("Error saving user, try again later.", err.status);
+        return next(error);
+    }
+    res.status(200).json({"status": "success", user});
 };
 
 //todo: fix nodemailer
@@ -317,7 +314,6 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.userData.userId;
     const email = req.userData.email;
-    console.log(userId);
     let user;
     try {
         user = await User.findById(userId)
@@ -375,38 +371,18 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
         const error = new RequestError("Error in changing password, try again later.", err.status);
         return next(error);
     }
-    let accessToken, refreshToken;
     try {
-        accessToken = jwt.sign(
-            {
-                userId: userId,
-                email: email,
-                changePasswordDate: user.changePasswordDate
-            },
-            process.env.ACCESS_TOKEN_KEY, {
-                expiresIn: '6hr'
-            }
-        );
-        refreshToken = jwt.sign(
-            {
-                userId: userId,
-                email: email,
-                changePasswordDate: user.changePasswordDate
-            },
-            process.env.REFRESH_TOKEN_KEY, {
-                expiresIn: '30d'
-            }
-        );
-    } catch (err) {
-        const error = new RequestError('Signing up failed, please try again later.', 500, err);
+        const {refreshToken, accessToken} = getTokens(userId, email, user.changePasswordDate);
+        res.status(200).json({
+            "status": "success",
+            message: "Password updated",
+            refreshToken: refreshToken,
+            accessToken: accessToken
+        });
+    } catch (e) {
+        const error = new RequestError('An error occurred, please try again later.', 422);
         return next(error);
     }
-    res.status(200).json({
-        "status": "success",
-        message: "Password updated",
-        refreshToken: refreshToken,
-        accessToken: accessToken
-    });
 };
 
 export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
@@ -422,6 +398,7 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     }
     let user;
     try {
+        // this token is not of type decoded token, refer forgotPassword
         user = await User.findOne({email: (token as { email: string }).email})
     } catch (err) {
         const error = new RequestError("Something went wrong can't get user.", 500);
