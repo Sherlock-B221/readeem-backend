@@ -1,6 +1,14 @@
 import * as express from 'express';
-import {body, check} from 'express-validator';
-import {changePassword, forgotPassword, login, logout, resetPassword, signUp} from '../controllers/auth-controller.js'
+import {body} from 'express-validator';
+import {
+    changePassword,
+    forgotPassword,
+    login,
+    logout,
+    resetPassword,
+    signUp,
+    thirdPartyAuth
+} from '../controllers/auth-controller.js'
 import {fileUpload} from "../middlewares/file-upload";
 import checkAuth from "../middlewares/check-auth";
 
@@ -11,17 +19,34 @@ router.post('/signUp'
         body('name')
             .not()
             .isEmpty(),
-        body('isThirdParty').not().isEmpty(),
+        body('mobile')
+            .not()
+            .isEmpty(),
+        body('imgHash').not().isEmpty,
+        body('email')
+            .normalizeEmail()
+            .isEmail(),
+        body('password').isLength({min: 6}),
+        fileUpload.single('img'),
+    ]
+    , signUp
+);
+
+router.post('/thirdParty'
+    , [
+        body('name')
+            .not()
+            .isEmpty(),
         body('mobile')
             .not()
             .isEmpty(),
         body('email')
             .normalizeEmail()
             .isEmail(),
-        body('password').isLength({min: 6}),
-        fileUpload.single('image'),
+        body('img').not().isEmpty,
+        body('imgHash').not().isEmpty,
     ]
-    , signUp
+    , thirdPartyAuth
 );
 
 router.post('/login'

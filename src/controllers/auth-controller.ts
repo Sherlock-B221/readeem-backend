@@ -8,10 +8,11 @@ import User from '../models/user';
 import RequestError from "../middlewares/request-error";
 import {validate} from "../utils/validate";
 import {sendMail} from "../utils/send-mail";
+import {getTokens} from "../utils/get-tokens";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const {name, email, password, mobile,imgHash} = req.body;
+    const {name, email, password, mobile, imgHash} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -187,6 +188,76 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         refreshToken: refreshToken,
         accessToken: accessToken
     });
+};
+
+export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunction) => {
+    validate(req, next);
+    const {name, email, mobile, imgUrl, imgHash} = req.body;
+    let existingUser;
+    try {
+        existingUser = await User.findOne({email: email});
+    } catch (err) {
+        const error = new RequestError("Error querying database", 500, err);
+        return next(error);
+    }
+
+    if (existingUser) {
+        if (existingUser.isThirdParty) {
+            try {
+                const {refreshToken, accessToken} = getTokens(existingUser.id, existingUser.email, existingUser.changePasswordDate);
+                const existingUserObj = existingUser.toObject();
+                delete existingUserObj.password;
+                await res.json({
+                    "status": "success",
+                    "user": existingUserObj,
+                    refreshToken: refreshToken,
+                    accessToken: accessToken
+                });
+            } catch (e) {
+                const error = new RequestError('An error occurred, please try again later.', 422);
+                return next(error);
+            }
+
+        }
+        const error = new RequestError('User created using email, please login using email instead.', 422);
+        return next(error);
+    }
+    const joinDate = Date().toLocaleString();
+    const createdUser = new User({
+        name,
+        email,
+        mobile,
+        imgHash,
+        isThirdParty: false,
+        joinDate,
+        img: imgUrl,
+        password: "",
+        completedBooks: [],
+        inProgressBooks: [],
+        favBooks: [],
+        changePasswordDate: joinDate,
+        cart: [],
+        reward: 0,
+        previousOrders: [],
+    });
+    try {
+        await createdUser.save();
+    } catch (err) {
+        const error = new RequestError("Error creating user", 500, err);
+        return next(error);
+    }
+    const {refreshToken, accessToken} = getTokens(createdUser.id, createdUser.email, createdUser.changePasswordDate);
+    let createdUserObj = createdUser.toObject();
+    delete createdUserObj.password;
+
+    await res
+        .status(201)
+        .json({
+            "status": "success",
+            user: createdUserObj,
+            refreshToken: refreshToken,
+            accessToken: accessToken
+        });
 };
 
 //todo: fix nodemailer
