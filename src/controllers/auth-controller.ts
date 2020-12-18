@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 import {NextFunction, Request, Response} from 'express';
-import RefreshRevoked from '../models/refresh_revoke';
+import RefreshRevoked from '../models/refresh-revoke';
 import jwt from 'jsonwebtoken';
-import AccessBlackList from '../models/access_blacklist';
+import AccessBlackList from '../models/access-blacklist';
 
 import User from '../models/user';
 import RequestError from "../middlewares/request-error";
@@ -254,7 +254,11 @@ export const addPasswordToUser = async (req: Request, res: Response, next: NextF
         const error = new RequestError("Error saving user, try again later.", err.status);
         return next(error);
     }
-    res.status(200).json({"status": "success", user});
+    const authState: { accessToken?: string, refreshToken?: string } = req.isAccessTokenValid ? {} : {
+        "accessToken": req.accessToken,
+        "refreshToken": req.refreshToken
+    };
+    res.status(200).json({"status": "success", user, ...authState});
 };
 
 //todo: fix nodemailer

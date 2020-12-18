@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import RequestError from './request-error';
-import AccessBlackList from '../models/access_blacklist';
-import RefreshRevoked from '../models/refresh_revoke';
+import AccessBlackList from '../models/access-blacklist';
+import RefreshRevoked from '../models/refresh-revoke';
 import {NextFunction, Request, Response} from 'express';
 import {DecodedToken} from "../interfaces/decoded_token";
 

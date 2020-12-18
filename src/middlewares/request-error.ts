@@ -1,4 +1,4 @@
-import {ErrorWithCode} from "../interfaces/error_with_code";
+import {ErrorWithCode} from "../interfaces/error-with-code";
 
 class RequestError implements ErrorWithCode {
     code: number;

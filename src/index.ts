@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import * as fs from "fs";
-import {ErrorWithCode} from "./interfaces/error_with_code";
+import {ErrorWithCode} from "./interfaces/error-with-code";
 
 import express, {NextFunction, Request, Response} from 'express';
 
