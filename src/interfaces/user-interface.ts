@@ -11,6 +11,7 @@ export interface IUser extends Document {
     favBooks: Array<IBook['_id']>,
     joinDate: Date,
     isThirdParty: boolean,
+    isBoth: boolean,
     changePasswordDate: Date,
     cart: Array<IItem['_id']>,
     reward: number,

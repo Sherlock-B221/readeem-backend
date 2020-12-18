@@ -1,6 +1,7 @@
 import * as express from 'express';
 import {body} from 'express-validator';
 import {
+    addPasswordToUser,
     changePassword,
     forgotPassword,
     login,
@@ -75,6 +76,14 @@ router.post('/changePassword',
     ],
     checkAuth,
     changePassword
+);
+
+router.post('/addPasswordUser',
+    [
+        body('password').isLength({min: 6})
+    ],
+    checkAuth,
+    addPasswordToUser
 );
 
 router.post('/resetPassword',
