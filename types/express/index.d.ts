@@ -4,7 +4,7 @@ declare module Express {
         userData?: {
             userId: string;
             email:string;
-            changePasswordDate:Date;
+            changePasswordDate:string;
         };
         isAccessTokenValid?: boolean;
         accessToken?: string;

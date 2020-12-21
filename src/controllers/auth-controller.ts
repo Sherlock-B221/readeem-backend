@@ -32,7 +32,8 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         const error = new RequestError('Could not create user, please try again.', 500, err);
         return next(error);
     }
-    const joinDate = Date().toLocaleString();
+    const joinDateString = Date().toLocaleString();
+    const joinDateObj = new Date(Date.parse(joinDateString));
     let filePath;
     try {
         if (req.file) {
@@ -54,13 +55,13 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         imgHash,
         isThirdParty: false,
         isBoth: false,
-        joinDate,
+        joinDate:joinDateObj,
         img: filePath,
         password: hashedPassword,
         completedBooks: [],
         inProgressBooks: [],
         favBooks: [],
-        changePasswordDate: joinDate,
+        changePasswordDate: joinDateObj,
         cart: [],
         reward: 0,
         previousOrders: [],
@@ -181,7 +182,8 @@ export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunc
         const error = new RequestError('User created using email, please login using email instead.', 422);
         return next(error);
     }
-    const joinDate = Date().toLocaleString();
+    const joinDateString = Date().toLocaleString();
+    const joinDateObj = new Date(Date.parse(joinDateString));
     const createdUser = new User({
         name,
         email,
@@ -189,13 +191,13 @@ export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunc
         imgHash,
         isThirdParty: true,
         isBoth: false,
-        joinDate,
+        joinDate:joinDateObj,
         img: imgUrl,
         password: "",
         completedBooks: [],
         inProgressBooks: [],
         favBooks: [],
-        changePasswordDate: joinDate,
+        changePasswordDate: joinDateObj,
         cart: [],
         reward: 0,
         previousOrders: [],
@@ -444,7 +446,8 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
         await AccessBlackList.create({accessToken: req.accessToken});
 
     } catch (err) {
-        const error = new RequestError("Error in changing password, try again later.", err.status);
+        console.log(err);
+        const error = new RequestError("Error in Logging out, try again later.", err.status);
         return next(error);
     }
     res.status(200).json({

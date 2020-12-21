@@ -4,6 +4,7 @@ import AccessBlackList from '../models/access-blacklist';
 import RefreshRevoked from '../models/refresh-revoke';
 import {NextFunction, Request, Response} from 'express';
 import {DecodedToken} from "../interfaces/decoded_token";
+import {log} from "util";
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'OPTIONS') {
@@ -31,12 +32,16 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                     changePasswordDate: changePasswordDate
                 };
                 const iat = (decodedAccessToken as DecodedToken).iat;
+                console.log(changePasswordDate);
+                console.log(new Date(Date.parse(changePasswordDate)).getTime());
                 // checking this to discard the tokens created before password change/forget event.
-                if (iat.getTime() < changePasswordDate.getTime()) {
+                if (iat * 1000 < new Date(Date.parse(changePasswordDate)).getTime()) {
                     const error = new RequestError('Access Token Expired!!!', 403);
                     return next(error);
                 }
                 req.isAccessTokenValid = true;
+                req.accessToken = accessToken;
+                req.refreshToken = refreshToken;
                 next();
             } catch (e) {
                 if (!refreshRevoked) {
@@ -44,7 +49,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                     const iat = (decodedRefreshToken as DecodedToken).iat;
                     const changePasswordDate = (decodedRefreshToken as DecodedToken).changePasswordDate;
                     // checking this to discard the tokens created before password change/forget event.
-                    if (iat.getTime() < changePasswordDate.getTime()) {
+                    if (iat * 1000 < new Date(Date.parse(changePasswordDate)).getTime()) {
                         const error = new RequestError('Refresh Token Expired!!!', 403);
                         return next(error);
                     }
