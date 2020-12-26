@@ -4,7 +4,6 @@ import AccessBlackList from '../models/access-blacklist';
 import RefreshRevoked from '../models/refresh-revoke';
 import {NextFunction, Request, Response} from 'express';
 import {DecodedToken} from "../interfaces/decoded_token";
-import {log} from "util";
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'OPTIONS') {

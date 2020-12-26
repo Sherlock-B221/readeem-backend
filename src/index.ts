@@ -20,7 +20,7 @@ app.use(express.json());
 
 //Routes
 app.use('/api/ping', express.Router().get('/', async (req: Request, res: Response, next: NextFunction) => {
-        res.json({
+    await res.json({
                 'status': 'success',
                 'message': "Pinged!!!"
             }
