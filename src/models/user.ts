@@ -7,7 +7,7 @@ const UserSchema: mongoose.Schema = new mongoose.Schema({
     name: {type: String, required: true},
     password: {type: String, required: true},
     completedBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
-    inProgressBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
+    inProgressBooks: [{type: Object, ref: 'Book'}],
     favBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
     joinDate: {type: Date, required: true},
     changePasswordDate: {type: Date},
