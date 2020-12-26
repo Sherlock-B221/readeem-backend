@@ -18,3 +18,8 @@ export const getItemById: RequestHandler = async (req: Request, res: Response, n
 export const editItem: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 
 };
+
+export const deleteItem: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+
+
+};
