@@ -2,12 +2,21 @@ import * as express from 'express';
 import {
     addRewardPoints,
     addToCart,
+    addToCompleted,
+    addToFav,
+    addToInProgress,
     editUser,
     getUserById,
     getUserCart,
+    getUserCompleted,
+    getUserFav,
+    getUserInProgress,
     getUsers,
     removeFromCart,
-    removeRewardPoints
+    removeFromFav,
+    removeFromInProgress,
+    removeRewardPoints,
+    updateInProgress
 } from '../controllers/user-controller.js'
 import checkAuth from "../middlewares/check-auth";
 import {check} from "express-validator";
@@ -20,7 +29,13 @@ router.get('/get/:id', getUserById);
 
 router.get('/get/cart', checkAuth, getUserCart);
 
-router.patch('/patch/', checkAuth, editUser);
+router.get('/get/fav', checkAuth, getUserFav);
+
+router.get('/get/inProgress', checkAuth, getUserInProgress);
+
+router.get('/get/completed', checkAuth, getUserCompleted);
+
+router.patch('/patch', checkAuth, editUser);
 
 router.patch('/patch/addPoints', [
     check('rewardPoints')
@@ -41,6 +56,60 @@ router.patch('/patch/removeFromCart', [
     check('items')
         .not().isEmpty(),
 ], checkAuth, removeFromCart);
+
+router.patch('/patch/addToInProgress',
+    [
+        check('bookMark')
+            .not()
+            .isEmpty()
+    ],
+    checkAuth,
+    addToInProgress);
+
+router.patch('/patch/addToCompleted',
+    [
+        check('bookId')
+            .not()
+            .isEmpty()
+    ],
+    checkAuth,
+    addToCompleted);
+
+router.patch('/patch/addToFav',
+    [
+        check('bookId')
+            .not()
+            .isEmpty()
+    ],
+    checkAuth,
+    addToFav);
+
+router.patch('/patch/removeFromFav',
+    [
+        check('bookId')
+            .not()
+            .isEmpty()
+    ],
+    checkAuth,
+    removeFromFav);
+
+router.patch('/patch/removeFromInProgress',
+    [
+        check('bookId')
+            .not()
+            .isEmpty()
+    ],
+    checkAuth,
+    removeFromInProgress);
+
+router.patch('/patch/updateInProgress',
+    [
+        check('bookMark')
+            .not()
+            .isEmpty()
+    ],
+    checkAuth,
+    updateInProgress);
 
 
 export default router;

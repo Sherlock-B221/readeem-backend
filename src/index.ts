@@ -10,6 +10,13 @@ import itemRoutes from './routes/item-routes';
 import bookRoutes from './routes/book-routes';
 import orderRoutes from './routes/order-routes';
 
+// todo: Optimizations:-
+// todo: 1 .lean()
+// todo: 2 use .select({name: 1})
+// todo: 3 try to use aggregrate
+// todo: 4 await Promise.all([user.save(), post.save()])
+// todo: 5 use virtual for better code quality
+
 import RequestError from './middlewares/request-error';
 
 require('dotenv').config();
