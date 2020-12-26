@@ -1,5 +1,7 @@
+import {IBook} from "./book-interface";
+
 export type BookMark = {
-    bookId: string,
+    bookId: IBook['_id'],
     href: string,
     created: number,
     locations: {

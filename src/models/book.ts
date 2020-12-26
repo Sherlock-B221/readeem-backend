@@ -5,7 +5,6 @@ import {IBook} from "../interfaces/book-interface";
 
 const BookSchema: mongoose.Schema = new mongoose.Schema({
     title: {type: String, required: true},
-    bookMark: {type: Object, default: {}},
     ratings: {type: Number, required: false},
     categories: [{type: String, required: true}],
     keywords: [{type: String, required: true}],
