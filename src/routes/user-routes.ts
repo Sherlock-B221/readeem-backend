@@ -4,6 +4,7 @@ import {
     addToCart,
     editUser,
     getUserById,
+    getUserCart,
     getUsers,
     removeFromCart,
     removeRewardPoints
@@ -16,6 +17,8 @@ const router = express.Router();
 router.get('/get', getUsers);
 
 router.get('/get/:id', getUserById);
+
+router.get('/get/cart', checkAuth, getUserCart);
 
 router.patch('/patch/', checkAuth, editUser);
 

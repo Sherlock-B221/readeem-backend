@@ -6,9 +6,12 @@ import {createOrder, getAllOrders, getOrderById, getUserOrders} from "../control
 const router = express.Router();
 router.post('/post'
     , [
-        check('email')
-            .isEmail(),
-
+        check('items')
+            .not()
+            .isEmpty(),
+        check('totalRewardPrice')
+            .not()
+            .isEmpty(),
     ]
     , checkAuth, createOrder
 );

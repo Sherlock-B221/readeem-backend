@@ -18,6 +18,10 @@ export const addRewardPoints: RequestHandler = async (req: Request, res: Respons
 export const editUser: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 };
 
+
+export const getUserCart: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+};
+
 export const removeRewardPoints: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     res.json({
         "status": "TS works bitch"

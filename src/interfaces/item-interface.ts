@@ -2,11 +2,13 @@ import {Document} from 'mongoose';
 
 export interface IItem extends Document {
     name: string,
-    description: string
-    price: number
+    description: string,
+    price: number,
+    discountedRewardPrice:number,
     tags: Array<string>,
+    couponCode:string,
     sellerName: string,
     sellerEmail: string,
     sellerNumber: string,
-    category: string
+    categories: Array<string>
 }
