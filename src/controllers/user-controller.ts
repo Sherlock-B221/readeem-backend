@@ -1,9 +1,22 @@
 import User from "../models/user";
 import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
+import {checkTokens} from "../utils/check-tokens";
 // import {validationResult} from "express-validator";
 
 export const getUsers: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    let users;
+    try {
+        users = await User.find().lean();
+        if (users.length > 0)
+            await res.json({"status": "success", users});
+        else
+            await res.json({"status": "failed", "message": "Users doesn't exists!!"});
+
+    } catch (err) {
+        const error = new RequestError("Error in fetching users.", 400);
+        next(error);
+    }
 };
 
 export const getUserById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -38,11 +51,11 @@ export const getUserInProgress: RequestHandler = async (req: Request, res: Respo
         const userId = req.userData.userId;
         inProgressBooks = await User.findById(userId).select({inProgressBooks: 1}).lean();
         if (inProgressBooks) {
-            console.log(typeof(inProgressBooks))
-            console.log(inProgressBooks)
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
             await res.json({
                 "status": "success"
-                , "inProgressBooks": inProgressBooks
+                , "inProgressBooks": inProgressBooks,
+                ...changedTokenPair
             });
         } else {
             await res.json({
