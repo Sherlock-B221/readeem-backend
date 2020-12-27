@@ -1,5 +1,5 @@
-// import User from "../models/user";
-// import RequestError from "../middlewares/request-error";
+import User from "../models/user";
+import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
 // import {validationResult} from "express-validator";
 
@@ -7,12 +7,54 @@ export const getUsers: RequestHandler = async (req: Request, res: Response, next
 };
 
 export const getUserById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    let user;
+    try {
+        const userId = req.params.id;
+        user = await User.findById(userId).lean();
+        if (user) {
+            await res.json({
+                "status": "success"
+                , "user": user
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        console.log(err)
+        const error = new RequestError("Error in fetching user's profile.", 400);
+        next(error);
+    }
 };
 
 export const getUserFav: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const getUserInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    let inProgressBooks;
+    try {
+        const userId = req.userData.userId;
+        inProgressBooks = await User.findById(userId).select({inProgressBooks: 1}).lean();
+        if (inProgressBooks) {
+            console.log(typeof(inProgressBooks))
+            console.log(inProgressBooks)
+            await res.json({
+                "status": "success"
+                , "inProgressBooks": inProgressBooks
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        console.log(err)
+        const error = new RequestError("Error in fetching user's in progress.", 400);
+        next(error);
+    }
 };
 
 export const getUserCompleted: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {

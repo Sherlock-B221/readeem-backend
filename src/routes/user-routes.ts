@@ -25,7 +25,7 @@ const router = express.Router();
 
 router.get('/get', getUsers);
 
-router.get('/get/:id', getUserById);
+router.get('/get/user/:id', getUserById);
 
 router.get('/get/cart', checkAuth, getUserCart);
 
