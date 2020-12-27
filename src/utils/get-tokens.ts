@@ -11,7 +11,7 @@ export const getTokens = (id: string, email: string, changePasswordDate: Date): 
                 changePasswordDate: changePasswordDate
             },
             process.env.ACCESS_TOKEN_KEY, {
-                expiresIn: '6hr'
+                expiresIn: '1hr'
             }
         );
         refreshToken = jwt.sign(

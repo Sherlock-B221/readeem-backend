@@ -11,8 +11,11 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
     }
     try {
         const accessToken: string = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
-        const refreshToken: string = req.body.refreshToken;
-        if (!accessToken && !refreshToken) {
+        let refreshToken: string = req.body.refreshToken;
+        if (refreshToken === undefined) {
+            refreshToken = req.query.refreshToken as string;
+        }
+        if (accessToken === undefined || refreshToken === undefined) {
             throw new RequestError('Authentication failed! Access and Refresh Tokens does not exist', 401);
         }
         let tokenBlacklisted = await AccessBlackList.findOne({
@@ -70,7 +73,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                                 changePasswordDate: changePasswordDate
                             },
                             process.env.ACCESS_TOKEN_KEY, {
-                                expiresIn: '6hr' // expires in 6 hours
+                                expiresIn: '1hr' // expires in 1 hours
                             }
                         );
                         newRefreshToken = jwt.sign(
@@ -97,7 +100,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
             return next(error);
         }
     } catch (err) {
-        const error = new RequestError(`Error with token. Info: ${err}`, 403);
+        const error = new RequestError(`Error with token. Info: ${JSON.stringify(err)}`, 403);
         return next(error);
     }
 };
