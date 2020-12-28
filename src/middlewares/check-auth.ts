@@ -10,6 +10,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
         return next();
     }
     try {
+        console.log('cehc')
         const accessToken: string = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
         let refreshToken: string = req.body.refreshToken;
         if (refreshToken === undefined) {
@@ -20,10 +21,11 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
         }
         let tokenBlacklisted = await AccessBlackList.findOne({
             "accessToken": accessToken
-        }) != null;
+        }).lean() != null;
         let refreshRevoked = await RefreshRevoked.findOne({
             "refreshToken": refreshToken
-        }) != null;
+        }).lean() != null;
+        // this is the case when the token sent has not been involved in logout or changePass
         if (!tokenBlacklisted) {
             try {
                 const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY);
@@ -44,9 +46,11 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                 req.isAccessTokenValid = true;
                 req.accessToken = accessToken;
                 req.refreshToken = refreshToken;
+                console.log('checkAuth');
                 next();
             } catch (e) {
                 if (!refreshRevoked) {
+                    console.log('')
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY);
                     const iat = (decodedRefreshToken as DecodedToken).iat;
                     const changePasswordDate = (decodedRefreshToken as DecodedToken).changePasswordDate;
@@ -93,10 +97,13 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                         const error = new RequestError('Authentication flow failed, please try again later.', 500, err);
                         return next(error);
                     }
+                } else {
+                    const error = new RequestError('Authentication failed!, the refresh token have been revoked.', 401);
+                    return next(error);
                 }
             }
         } else {
-            const error = new RequestError('Authentication failed!', 401);
+            const error = new RequestError('Authentication failed!, Access Token is blacklisted!!', 401);
             return next(error);
         }
     } catch (err) {
