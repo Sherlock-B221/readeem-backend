@@ -10,7 +10,6 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
         return next();
     }
     try {
-        console.log('cehc')
         const accessToken: string = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
         let refreshToken: string = req.body.refreshToken;
         if (refreshToken === undefined) {
@@ -46,11 +45,9 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                 req.isAccessTokenValid = true;
                 req.accessToken = accessToken;
                 req.refreshToken = refreshToken;
-                console.log('checkAuth');
                 next();
             } catch (e) {
                 if (!refreshRevoked) {
-                    console.log('')
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY);
                     const iat = (decodedRefreshToken as DecodedToken).iat;
                     const changePasswordDate = (decodedRefreshToken as DecodedToken).changePasswordDate;

@@ -4,8 +4,7 @@ import {
     addToCart,
     addToCompleted,
     addToFav,
-    addToInProgress,
-    editUser,
+    addToInProgress, editProfile,
     getUserById,
     getUserCart,
     getUserCompleted,
@@ -35,7 +34,7 @@ router.get('/get/inProgress', checkAuth, getUserInProgress);
 
 router.get('/get/completed', checkAuth, getUserCompleted);
 
-router.patch('/patch', checkAuth, editUser);
+router.patch('/patch', checkAuth, editProfile);
 
 router.patch('/patch/addPoints', [
     check('rewardPoints')

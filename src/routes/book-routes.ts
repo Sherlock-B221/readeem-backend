@@ -6,7 +6,7 @@ import {createBook, deleteBook, editBook, getAllBooks, getBookById} from "../con
 
 
 const router = express.Router();
-
+// todo: use multer for file upload
 router.post('/post'
     , [
         check('title')
@@ -19,7 +19,9 @@ router.post('/post'
             .not().isEmpty(),
         check('author')
             .not().isEmpty(),
-        check('cover')
+        check('bookUrl')
+            .not().isEmpty(),
+        check('rewardPoints')
             .not().isEmpty(),
     ]
     , checkAuth, checkSuperUser, createBook
