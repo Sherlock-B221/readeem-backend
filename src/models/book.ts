@@ -9,6 +9,8 @@ const BookSchema: mongoose.Schema = new mongoose.Schema({
     categories: [{type: String, required: true}],
     keywords: [{type: String, required: true}],
     publishedDate: {type: Date, required: true},
+    bookUrl: {type: String, required: true},
+    rewardPoints: {type: String, required: true},
     author: {type: String, required: true},
     cover: {
         type: String,
