@@ -14,7 +14,13 @@ export const getAllBooks: RequestHandler = async (req: Request, res: Response, n
         const error = new RequestError("Error in finding books.", 400, err);
         next(error);
     }
-    await res.json(books);
+    res.json(
+        {
+            "Books": books
+
+        }
+)
+
 
 
 };
