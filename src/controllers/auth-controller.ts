@@ -11,6 +11,7 @@ import {sendMail} from "../utils/send-mail";
 import {getTokens} from "../utils/get-tokens";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
+    //validation
     validate(req, next);
     const {name, email, password, mobile, imgHash} = req.body;
     let existingUser;

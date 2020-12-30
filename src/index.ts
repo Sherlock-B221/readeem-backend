@@ -66,7 +66,7 @@ app.listen(process.env.PORT || process.env.SV_PORT, () => {
     console.log("Started server on Port", process.env.SV_PORT);
     mongoose
         .connect(
-            `mongodb+srv://admin:iamadmin@cluster0.eqegx.mongodb.net/readeemDB?retryWrites=true&w=majority`, {
+            process.env.DB_URL, {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
                 useCreateIndex: true
