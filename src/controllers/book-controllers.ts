@@ -6,6 +6,16 @@ import RequestError from "../middlewares/request-error";
 // import {validationResult} from "express-validator";
 
 export const getAllBooks: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    validate(req,next);
+    let books;
+    try{
+        books = Book.find();
+    }catch (err){
+        const error = new RequestError("Error in finding books.", 400, err);
+        next(error);
+    }
+    await res.json(books);
+
 
 };
 
