@@ -13,7 +13,6 @@ import orderRoutes from './routes/order-routes';
 // todo: Improvements:-
 // todo: 1 encrypt tokens wen storing in dp
 // todo: 2 maybe improve super-user
-// todo: 3 refactor mongoose query string using .env
 // todo: 4 try to use await Promise.all([user.save(), post.save()])
 // todo: 5 use virtual for better code quality
 import RequestError from './middlewares/request-error';

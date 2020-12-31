@@ -1,7 +1,14 @@
 import * as express from 'express';
 import {check} from 'express-validator';
 import checkAuth from "../middlewares/check-auth";
-import {createItem, deleteItem, editItem, getAllItems, getItemById} from "../controllers/item-controller";
+import {
+        createItem,
+        deleteItem,
+        editItem,
+        getAllItems,
+        getItemById,
+        getItemCouponCode
+} from "../controllers/item-controller";
 import checkSuperUser from "../middlewares/super-user";
 
 const router = express.Router();
@@ -35,6 +42,8 @@ router.post('/post'
 router.get('/get/all', checkAuth, getAllItems);
 
 router.get('/get/one/:id', checkAuth, getItemById);
+
+router.get('/get/couponCode/:code',checkAuth,getItemCouponCode);
 
 router.patch('/patch', checkSuperUser, editItem);
 
