@@ -25,6 +25,7 @@ export const getUserById: RequestHandler = async (req: Request, res: Response, n
         const userId = req.params.id;
         user = await User.findById(userId).lean();
         if (user) {
+            delete user.password;
             await res.json({
                 "status": "success"
                 , "user": user

@@ -16,7 +16,7 @@ export const getAllBooks: RequestHandler = async (req: Request, res: Response, n
     }
     res.json(
         {
-            "Books": books
+            "books": books
 
         }
 )
