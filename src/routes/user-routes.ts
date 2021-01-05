@@ -41,11 +41,6 @@ router.patch('/patch/addPoints', [
         .not().isEmpty(),
 ], checkAuth, addRewardPoints);
 
-router.patch('/patch/reducePoints', [
-    check('rewardPoints')
-        .not().isEmpty(),
-], checkAuth, removeRewardPoints);
-
 router.patch('/patch/addToCart', [
     check('items')
         .not().isEmpty(),

@@ -154,12 +154,6 @@ export const getUserCart: RequestHandler = async (req: Request, res: Response, n
     }
 };
 
-export const removeRewardPoints: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
-};
-
 export const addToCart: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     res.json({
         "status": "TS works bitch"
