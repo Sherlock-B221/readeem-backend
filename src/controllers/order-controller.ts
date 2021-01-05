@@ -1,12 +1,59 @@
-// import Order from "../models/order";
-// import RequestError from "../middlewares/request-error";
+import Order from "../models/order";
+import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
-// import {validationResult} from "express-validator";
+import User from "../models/user";
+import {checkTokens} from "../utils/check-tokens";
+import {validate} from "../utils/validate";
+import {IUser} from "../interfaces/user-interface";
+import {IItem} from "../interfaces/item-interface";
 
 export const getAllOrders: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const createOrder: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    validate(req, next);
+    try {
+        const {items, totalRewardPoints} = req.body;
+        let userWithOrder: IUser;
+        const userId = req.userData.userId;
+        userWithOrder = await User.findById(userId);
+        const orderDate = new Date();
+        if (userWithOrder) {
+            if (userWithOrder.reward < totalRewardPoints) {
+                await res.json({"status": "failed", "message": "Insufficient Funds"});
+            }
+            const newOrder = new Order({
+                items,
+                totalRewardPoints,
+                userId,
+                orderDate
+            });
+            const newOrderId = newOrder._id;
+            userWithOrder.reward -= totalRewardPoints;
+            userWithOrder.previousOrders.push(newOrderId);
+            items.forEach((item: IItem) => {
+                if (userWithOrder.cart.includes(item._id)) {
+                    userWithOrder.cart = userWithOrder.cart
+                        .filter(cartItem => cartItem._id !== item._id);
+                }
+            })
+            await Promise.all([newOrder.save(), userWithOrder.save()]);
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success"
+                , "userWithOrder": userWithOrder,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in fetching user's cart.", 400, err);
+        next(error);
+    }
 };
 
 export const getOrderById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
