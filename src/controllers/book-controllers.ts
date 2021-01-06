@@ -52,6 +52,22 @@ export const createBook: RequestHandler = async (req: Request, res: Response, ne
 };
 
 export const getBookById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    let bookId=req.params.id;
+    let book;
+    try{
+        book = Book.findById(bookId);
+    }catch (err){
+        const error = new RequestError("Error finding the book with id.", 400, err);
+        next(error);
+    }
+    res.status(200).json(
+        {
+            status:"success",
+            book:book,
+        }
+
+    )
+
 
 };
 
