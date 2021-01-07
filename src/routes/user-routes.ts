@@ -14,7 +14,6 @@ import {
     removeFromCart,
     removeFromFav,
     removeFromInProgress,
-    removeRewardPoints,
     updateInProgress
 } from '../controllers/user-controller.js'
 import checkAuth from "../middlewares/check-auth";
