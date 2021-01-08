@@ -8,6 +8,13 @@ import {IUser} from "../interfaces/user-interface";
 import {IItem} from "../interfaces/item-interface";
 
 export const getAllOrders: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const orders = await Order.find().lean();
+        await res.json({"status": "success", orders});
+    } catch (err) {
+        const error = new RequestError("Error in fetching orders.", 400);
+        next(error);
+    }
 };
 
 export const createOrder: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -57,7 +64,29 @@ export const createOrder: RequestHandler = async (req: Request, res: Response, n
 };
 
 export const getOrderById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const orderId = req.params.id;
+    try {
+        const order = await Order.findById(orderId).lean();
+        if (!order) {
+            const error = new RequestError("Order with this id, doesn't exist.", 404);
+            next(error);
+        }
+        const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+        await res.json({"status": "success", order, ...changedTokenPair});
+    } catch (err) {
+        const error = new RequestError("Error in fetching orders of the given user.", 400);
+        next(error);
+    }
 };
 
 export const getUserOrders: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.userData.userId;
+    try {
+        const orders = await Order.find({userId}).lean();
+        const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+        await res.json({"status": "success", orders, ...changedTokenPair});
+    } catch (err) {
+        const error = new RequestError("Error in fetching orders of the given user.", 400);
+        next(error);
+    }
 };

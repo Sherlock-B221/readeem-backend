@@ -8,10 +8,7 @@ export const getUsers: RequestHandler = async (req: Request, res: Response, next
     let users;
     try {
         users = await User.find().lean();
-        if (users.length > 0)
-            await res.json({"status": "success", users});
-        else
-            await res.json({"status": "failed", "message": "Users doesn't exists!!"});
+        await res.json({"status": "success", users});
 
     } catch (err) {
         const error = new RequestError("Error in fetching users.", 400);
