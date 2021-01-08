@@ -3,7 +3,10 @@ import RequestError from "./request-error";
 
 const checkSuperUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const superSecretKey: string = req.body.superSecretKey;
+        let superSecretKey: string = req.body.superSecretKey;
+        if(superSecretKey===undefined){
+           superSecretKey = req.query.superSecretKey as string;
+        }
         if (superSecretKey === process.env.SUPER_SECRET_KEY) {
             next();
         } else {

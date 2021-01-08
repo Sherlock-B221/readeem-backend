@@ -16,7 +16,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
             refreshToken = req.query.refreshToken as string;
         }
         if (accessToken === undefined || refreshToken === undefined) {
-            throw new RequestError('Authentication failed! Access and Refresh Tokens does not exist', 401);
+            throw new RequestError('Authentication failed! Access and/or Refresh Tokens not sent', 401);
         }
         let tokenBlacklisted = await AccessBlackList.findOne({
             "accessToken": accessToken
