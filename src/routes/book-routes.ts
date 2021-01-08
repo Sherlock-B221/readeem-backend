@@ -24,14 +24,29 @@ router.post('/post'
         check('rewardPoints')
             .not().isEmpty(),
     ]
-    , checkAuth, checkSuperUser, createBook
+    ,  checkSuperUser, createBook
 );
 
 router.get('/get/all', checkAuth, getAllBooks);
 
 router.get('/get/one/:id', checkAuth, getBookById);
 
-router.patch('/patch/:id', checkSuperUser, editBook);
+router.patch('/patch/:id',[
+        check('title')
+            .not().isEmpty(),
+        check('categories')
+            .not().isEmpty(),
+        check('keywords')
+            .not().isEmpty(),
+        check('publishedDate')
+            .not().isEmpty(),
+        check('author')
+            .not().isEmpty(),
+        check('bookUrl')
+            .not().isEmpty(),
+        check('rewardPoints')
+            .not().isEmpty(),
+], checkSuperUser, editBook);
 
 router.delete('/delete', checkSuperUser, deleteBook);
 
