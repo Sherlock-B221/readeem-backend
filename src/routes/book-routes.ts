@@ -31,7 +31,7 @@ router.get('/get/all', checkAuth, getAllBooks);
 
 router.get('/get/one/:id', checkAuth, getBookById);
 
-router.patch('/patch', checkSuperUser, editBook);
+router.patch('/patch/:id', checkSuperUser, editBook);
 
 router.delete('/delete', checkSuperUser, deleteBook);
 

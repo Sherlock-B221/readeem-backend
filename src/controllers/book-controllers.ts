@@ -72,6 +72,34 @@ export const getBookById: RequestHandler = async (req: Request, res: Response, n
 };
 
 export const editBook: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const bookId = req.params.id;
+    let book;
+    try{
+        book = await Book.findById(bookId);
+    }catch (err)
+    {
+        const error = new RequestError("Something went wrong.Error finding the book with id.", 400, err);
+        next(error);
+    }
+    const {title, rewardPoints, keywords, publishedDate, author, cover, bookUrl} = req.body;
+    book.author=author;
+    book.title=title;
+    book.rewardPoints=rewardPoints;
+    book.keywords=keywords;
+    book.publishedDate=publishedDate;
+    book.cover=cover;
+    book.bookUrl=bookUrl;
+    try{
+        book.save();
+    }catch (err){
+        const error = new RequestError(
+            err.message,
+            500
+        );
+    }
+    res.status(200).json({
+        updatedBook: book,
+    })
 
 };
 
