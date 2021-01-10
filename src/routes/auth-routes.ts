@@ -10,7 +10,7 @@ import {
     signUp,
     thirdPartyAuth
 } from '../controllers/auth-controller.js'
-import {fileUpload} from "../middlewares/file-upload";
+import {singleFileUpload} from "../middlewares/single-file-upload";
 import checkAuth from "../middlewares/check-auth";
 
 const router = express.Router();
@@ -28,7 +28,7 @@ router.post('/signUp'
             .normalizeEmail()
             .isEmail(),
         body('password').isLength({min: 6}),
-        fileUpload.single('img'),
+        singleFileUpload('uploads/images','img'),
     ]
     , signUp
 );
