@@ -1,35 +1,25 @@
 import Book from "../models/book";
-// import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
 import {validate} from "../utils/validate";
 import RequestError from "../middlewares/request-error";
 import {IBook} from "../interfaces/book-interface";
-// import {validationResult} from "express-validator";
 
 export const getAllBooks: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    validate(req,next);
-    let books;
     try{
-        books = Book.find();
+        const books = await Book.find().lean();
+        res.json(
+            {
+                books
+            });
     }catch (err){
         const error = new RequestError("Error in finding books.", 400, err);
         next(error);
     }
-    res.json(
-        {
-            "books": books
-
-        }
-)
-
-
-
 };
 
 export const createBook: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
     const {title, categories, rewardPoints, keywords, publishedDate, author, cover, bookUrl} = req.body;
-    console.log(title);
     try {
         const createdBook = new Book({
             title,
@@ -53,23 +43,18 @@ export const createBook: RequestHandler = async (req: Request, res: Response, ne
 };
 
 export const getBookById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    let bookId=req.params.id;
-    let book;
     try{
-        book = Book.findById(bookId);
+        const bookId=req.params.id;
+        const book = await Book.findById(bookId).lean();
+        res.status(200).json(
+            {
+                status:"success",
+                book:book,
+            })
     }catch (err){
         const error = new RequestError("Error finding the book with id.", 400, err);
         next(error);
     }
-    res.status(200).json(
-        {
-            status:"success",
-            book:book,
-        }
-
-    )
-
-
 };
 
 export const editBook: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
