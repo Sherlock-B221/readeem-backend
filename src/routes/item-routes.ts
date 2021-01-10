@@ -7,7 +7,7 @@ import {
         editItem,
         getAllItems,
         getItemById,
-        getItemCouponCode
+        getItemCouponCode, itemFullSearch, itemFuzzySearch
 } from "../controllers/item-controller";
 import checkSuperUser from "../middlewares/super-user";
 
@@ -43,10 +43,14 @@ router.get('/get/all', checkAuth, getAllItems);
 
 router.get('/get/one/:id', checkAuth, getItemById);
 
-router.get('/get/couponCode/:code',checkAuth,getItemCouponCode);
+router.get('/get/search',checkAuth,itemFullSearch);
 
-router.patch('/patch', checkSuperUser, editItem);
+router.get('/get/fuzzy',checkAuth,itemFuzzySearch);
 
-router.delete('/delete', checkSuperUser, deleteItem);
+router.get('/get/couponCode/:id',checkAuth,getItemCouponCode);
+
+router.patch('/patch/:id', checkSuperUser, editItem);
+
+router.delete('/delete/:id', checkSuperUser, deleteItem);
 
 export default router;

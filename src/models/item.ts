@@ -15,6 +15,7 @@ const ItemSchema: mongoose.Schema = new mongoose.Schema({
     sellerEmail: {type: String, required: true},
     sellerNumber: {type: String, required: true},
     categories: [{type: String, required: true}],
+    keywords:[{type:String,required:true}]
 })
 
 ItemSchema.plugin(uniqueValidator);

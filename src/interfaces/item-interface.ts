@@ -10,5 +10,6 @@ export interface IItem extends Document {
     sellerName: string,
     sellerEmail: string,
     sellerNumber: string,
+    keywords:Array<string>,
     categories: Array<string>
 }

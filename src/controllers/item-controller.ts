@@ -25,12 +25,18 @@ export const createItem: RequestHandler = async (req: Request, res: Response, ne
 };
 
 export const getItemCouponCode: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    const encryptedCode = req.params.code;
+    const encryptedCode = req.params.id;
     if (!encryptedCode) {
         const error = new RequestError('Code not sent!', 404);
         next(error);
     }
-    const decryptedCode = decryptCrypto(encryptedCode)
+    try{
+        const decryptedCode = decryptCrypto(encryptedCode);
+        res.json({});
+    }catch(e) {
+        const error = new RequestError('Error in decrypting code!', 400);
+        next(error);
+    }
 };
 
 export const getItemById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -54,6 +60,25 @@ export const editItem: RequestHandler = async (req: Request, res: Response, next
 };
 
 export const deleteItem: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    try {
+        await Item.deleteOne({_id:id});
+        await res.json({
+            "status": "success",
+            "message": "Item deleted successfully,if it existed."
+        });
+    } catch (e) {
+        const error = new RequestError("Error in deleting item", 400,e);
+        next(error);
+    }
+};
+
+export const itemFullSearch: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+
+
+};
+
+export const itemFuzzySearch: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 
 
 };
