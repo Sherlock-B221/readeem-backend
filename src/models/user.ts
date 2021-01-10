@@ -13,7 +13,7 @@ const UserSchema: mongoose.Schema = new mongoose.Schema({
     changePasswordDate: {type: Date},
     isThirdParty: {type: Boolean, required: true},
     isBoth: {type: Boolean, required: true},
-    cart: [{type: mongoose.Types.ObjectId, ref: 'Item'}],
+    cart: [{type: Object, ref: 'Item'}],
     reward: {type: Number, default: 0},
     previousOrders: [{type: mongoose.Types.ObjectId, ref: 'Order'}],
     email: {type: String, required: true, unique: true,},

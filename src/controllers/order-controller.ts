@@ -6,6 +6,7 @@ import {checkTokens} from "../utils/check-tokens";
 import {validate} from "../utils/validate";
 import {IUser} from "../interfaces/user-interface";
 import {IItem} from "../interfaces/item-interface";
+import {IOrder, IOrderItem} from "../interfaces/order-interface";
 
 export const getAllOrders: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -20,7 +21,7 @@ export const getAllOrders: RequestHandler = async (req: Request, res: Response, 
 export const createOrder: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
     try {
-        const {items, totalRewardPoints} = req.body;
+        const {items, totalRewardPoints}:{items:Array<IOrderItem>,totalRewardPoints:number} = req.body;
         let userWithOrder: IUser;
         const userId = req.userData.userId;
         userWithOrder = await User.findById(userId);
@@ -38,7 +39,7 @@ export const createOrder: RequestHandler = async (req: Request, res: Response, n
             const newOrderId = newOrder._id;
             userWithOrder.reward -= totalRewardPoints;
             userWithOrder.previousOrders.push(newOrderId);
-            items.forEach((item: IItem) => {
+            items.forEach((item: IOrderItem) => {
                 if (userWithOrder.cart.includes(item._id)) {
                     userWithOrder.cart = userWithOrder.cart
                         .filter(cartItem => cartItem._id !== item._id);

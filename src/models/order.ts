@@ -4,7 +4,7 @@ import {IOrder} from "../interfaces/order-interface";
 
 
 const OrderSchema: mongoose.Schema = new mongoose.Schema({
-    items: [{type: mongoose.Types.ObjectId, ref: 'Item', required: true}],
+    items: [{type: Object, ref: 'Item', required: true}],
     userId: {type: mongoose.Types.ObjectId, ref: 'User', required: true},
     orderDate: {type: Date, required: true},
     totalRewardPrice: {type: Number, required: true}

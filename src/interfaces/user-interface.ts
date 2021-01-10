@@ -1,7 +1,6 @@
 import {Document} from "mongoose";
 import {IBook} from "./book-interface";
-import {IItem} from "./item-interface";
-import {IOrder} from "./order-interface";
+import {IOrder, IOrderItem} from "./order-interface";
 import {BookMark} from "./book-mark";
 
 export interface IUser extends Document {
@@ -14,7 +13,7 @@ export interface IUser extends Document {
     isThirdParty: boolean,
     isBoth: boolean,
     changePasswordDate: Date,
-    cart: Array<IItem['_id']>,
+    cart: Array<IOrderItem>,
     reward: number,
     previousOrders: Array<IOrder['_id']>,
     email: string,
