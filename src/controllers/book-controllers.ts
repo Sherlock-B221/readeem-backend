@@ -18,8 +18,18 @@ export const getAllBooks: RequestHandler = async (req: Request, res: Response, n
 };
 
 export const createBook: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    validate(req, next);
-    const {title, categories, rewardPoints, keywords, publishedDate, author, cover, bookUrl} = req.body;
+    // validate(req, next);
+    const {title, categories, rewardPoints, keywords, publishedDate,author, bookUrl} = req.body;
+    let cover;
+    try {
+
+        cover =  req.file.path;
+    } catch (err) {
+        console.log(err);
+        const error = new RequestError(err.message, err.code, err);
+        return next(error);
+    }
+    cover = 'https://win75.herokuapp.com/' + cover;
     try {
         const createdBook = new Book({
             title,
@@ -27,13 +37,11 @@ export const createBook: RequestHandler = async (req: Request, res: Response, ne
             rewardPoints,
             keywords,
             publishedDate,
+            cover,
             author,
             bookUrl,
             ratings: 0
         });
-        if (cover) {
-            createdBook.cover = cover;
-        }
         await createdBook.save();
         res.json({status: "success", createdBook});
     } catch (err) {

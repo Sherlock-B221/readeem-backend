@@ -3,6 +3,7 @@ import {check} from 'express-validator';
 import checkAuth from "../middlewares/check-auth";
 import checkSuperUser from "../middlewares/super-user";
 import {createBook, deleteBook, editBook, getAllBooks, getBookById} from "../controllers/book-controllers";
+import {singleFileUpload} from "../middlewares/single-file-upload";
 
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.post('/post'
             .not().isEmpty(),
         check('rewardPoints')
             .not().isEmpty(),
+        singleFileUpload('uploads/bookCovers','cover'),
     ]
     ,  checkSuperUser, createBook
 );
