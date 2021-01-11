@@ -11,11 +11,12 @@ const ItemSchema: mongoose.Schema = new mongoose.Schema({
     tags: [{type: String, required: true}],
     // it is to be stored in encryption
     couponCode: {type: String, required: true},
+    //
+    itemImg: {type:String,required: true},
     sellerName: {type: String, required: true},
     sellerEmail: {type: String, required: true},
     sellerNumber: {type: String, required: true},
     categories: [{type: String, required: true}],
-    keywords:[{type:String,required:true}]
 })
 
 ItemSchema.plugin(uniqueValidator);

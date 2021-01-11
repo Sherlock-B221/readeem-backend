@@ -3,6 +3,7 @@ import {Document} from 'mongoose';
 export interface IItem extends Document {
     name: string,
     description: string,
+    itemImg: string,
     price: number,
     discountedRewardPrice:number,
     tags: Array<string>,
@@ -10,6 +11,5 @@ export interface IItem extends Document {
     sellerName: string,
     sellerEmail: string,
     sellerNumber: string,
-    keywords:Array<string>,
     categories: Array<string>
 }
