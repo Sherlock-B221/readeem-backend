@@ -3,6 +3,7 @@ import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
 import {checkTokens} from "../utils/check-tokens";
 import {validate} from "../utils/validate";
+import {IUser} from "../interfaces/user-interface";
 
 export const getUsers: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     let users;
@@ -120,7 +121,22 @@ export const addRewardPoints: RequestHandler = async (req: Request, res: Respons
     const rewardPoints = req.body.rewardPoints;
     const userId = req.userData.userId;
     try {
-
+        const user:IUser = await User.findById(userId);
+        if (user) {
+            user.reward += rewardPoints;
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
     } catch (err) {
         const error = new RequestError("Error in adding reward points.", 400, err);
         next(error);
@@ -152,9 +168,30 @@ export const getUserCart: RequestHandler = async (req: Request, res: Response, n
 };
 
 export const addToCart: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const items = req.body.items;
+    const userId = req.userData.userId;
+    try {
+        const user:IUser = await User.findById(userId);
+        if (user) {
+            user.cart.push(items);
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in adding items to cart.", 400, err);
+        next(error);
+    }
 };
 
 export const editProfile: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -164,22 +201,59 @@ export const editProfile: RequestHandler = async (req: Request, res: Response, n
 };
 
 export const removeFromCart: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const itemsToBeRemoved = req.body.items;
+    const userId = req.userData.userId;
+    try {
+        const user:IUser = await User.findById(userId);
+        if (user) {
+            user.cart = user.cart.filter((item) => itemsToBeRemoved.includes(item));
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in adding removing item from cart.", 400, err);
+        next(error);
+    }
 };
 
 export const removeFromFav: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const bookId = req.body.bodyId;
+    const userId = req.userData.userId;
+    try {
+        const user:IUser = await User.findById(userId);
+        if (user) {
+            user.favBooks.push(bookId);
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in removing book from fav.", 400, err);
+        next(error);
+    }
 };
 
-export const removeFromInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
-};
 
 export const addToCompleted: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     res.json({

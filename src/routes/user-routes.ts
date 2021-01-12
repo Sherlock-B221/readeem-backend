@@ -13,7 +13,6 @@ import {
     getUsers,
     removeFromCart,
     removeFromFav,
-    removeFromInProgress,
     updateInProgress
 } from '../controllers/user-controller.js'
 import checkAuth from "../middlewares/check-auth";
@@ -85,15 +84,6 @@ router.patch('/patch/removeFromFav',
     ],
     checkAuth,
     removeFromFav);
-
-router.patch('/patch/removeFromInProgress',
-    [
-        check('bookId')
-            .not()
-            .isEmpty()
-    ],
-    checkAuth,
-    removeFromInProgress);
 
 router.patch('/patch/updateInProgress',
     [
