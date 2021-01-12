@@ -105,6 +105,15 @@ export const editBook: RequestHandler = async (req: Request, res: Response, next
 };
 
 export const deleteBook: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-
-
+    const id = req.params.id;
+    try {
+        await Book.deleteOne({_id: id});
+        await res.json({
+            "status": "success",
+            "message": "Book deleted successfully, if it existed."
+        });
+    } catch (e) {
+        const error = new RequestError("Error in deleting book.", 400, e);
+        next(error);
+    }
 };

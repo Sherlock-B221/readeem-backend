@@ -50,6 +50,6 @@ router.patch('/patch/:id',[
             .not().isEmpty(),
 ], checkSuperUser, editBook);
 
-router.delete('/delete', checkSuperUser, deleteBook);
+router.delete('/delete/:id', checkSuperUser, deleteBook);
 
 export default router;
