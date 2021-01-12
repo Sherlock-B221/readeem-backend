@@ -8,13 +8,13 @@ export const sendMail = async (link: string, email: string, next: NextFunction) 
         service: 'gmail',
         host: 'smtp.gmail.com',
         auth: {
-            user: process.env.EMAIL_NAME,
-            pass: process.env.EMAIL_PASS
+            user: process.env.Email_Name,
+            pass: process.env.Email_Pass
         }
     }));
 
     const mailOptions = {
-        from: process.env.EMAIL_NAME,
+        from: process.env.Email_Name,
         to: email,
         subject: '',
         text: `${link} 
