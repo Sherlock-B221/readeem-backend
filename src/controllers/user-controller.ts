@@ -262,6 +262,28 @@ export const removeFromFav: RequestHandler = async (req: Request, res: Response,
 export const addToCompleted: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
     const userId = req.userData.userId;
+    const bookId = req.body.bookId;
+    try {
+        const user: IUser = await User.findById(userId);
+        if (user) {
+            user.completedBooks.push(bookId);
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in adding book to completed.", 400, err);
+        next(error);
+    }
 
 };
 
