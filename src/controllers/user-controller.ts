@@ -1,9 +1,11 @@
 import User from "../models/user";
+import Book from "../models/book";
 import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
 import {checkTokens} from "../utils/check-tokens";
 import {validate} from "../utils/validate";
 import {IUser} from "../interfaces/user-interface";
+import {IBook} from "../interfaces/book-interface";
 
 export const getUsers: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     let users;
@@ -229,12 +231,14 @@ export const removeFromCart: RequestHandler = async (req: Request, res: Response
 
 export const removeFromFav: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const bookId = req.body.bodyId;
+    const bId = req.body.bookId;
     const userId = req.userData.userId;
     try {
         const user:IUser = await User.findById(userId);
         if (user) {
-            user.favBooks.push(bookId);
+            user.favBooks = user.favBooks.filter((bookId) => {
+                return bId==bookId;
+            });
             await user.save();
             const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
             await res.json({
@@ -256,15 +260,36 @@ export const removeFromFav: RequestHandler = async (req: Request, res: Response,
 
 
 export const addToCompleted: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const userId = req.userData.userId;
+
 };
 
 export const addToFav: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const userId = req.userData.userId;
+    const bookId = req.body.bookId;
+    try {
+        const user: IUser = await User.findById(userId);
+        if (user) {
+            user.favBooks.push(bookId);
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in adding book to fav.", 400, err);
+        next(error);
+    }
 };
 
 export const updateInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {

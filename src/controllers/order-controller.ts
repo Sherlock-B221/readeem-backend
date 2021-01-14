@@ -5,8 +5,7 @@ import User from "../models/user";
 import {checkTokens} from "../utils/check-tokens";
 import {validate} from "../utils/validate";
 import {IUser} from "../interfaces/user-interface";
-import {IItem} from "../interfaces/item-interface";
-import {IOrder, IOrderItem} from "../interfaces/order-interface";
+import {IOrderItem} from "../interfaces/order-interface";
 
 export const getAllOrders: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {

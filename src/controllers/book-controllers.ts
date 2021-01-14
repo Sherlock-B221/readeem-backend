@@ -18,7 +18,7 @@ export const getAllBooks: RequestHandler = async (req: Request, res: Response, n
 };
 
 export const createBook: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    // validate(req, next);
+    validate(req, next);
     const {title, categories, rewardPoints, keywords, publishedDate,author, bookUrl} = req.body;
     let cover;
     try {
