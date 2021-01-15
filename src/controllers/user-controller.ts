@@ -5,7 +5,7 @@ import {NextFunction, Request, RequestHandler, Response} from "express";
 import {checkTokens} from "../utils/check-tokens";
 import {validate} from "../utils/validate";
 import {IUser} from "../interfaces/user-interface";
-import {IBook} from "../interfaces/book-interface";
+import {BookMark} from "../interfaces/book-mark";
 
 export const getUsers: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     let users;
@@ -315,13 +315,56 @@ export const addToFav: RequestHandler = async (req: Request, res: Response, next
 };
 
 export const updateInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const userId = req.userData.userId;
+    const bookMark:BookMark = req.body.bookMark;
+    const bookId = bookMark.bookId;
+    try{
+        const user: IUser = await User.findById(userId);
+        if (user) {
+
+            user.inProgressBooks.push(bookId);
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }catch{
+
+        }
+    }
 };
 
 export const addToInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    validate(req, next);
+    const userId = req.userData.userId;
+    const bookId = req.body.bookId;
+    try {
+        const user: IUser = await User.findById(userId);
+        if (user) {
+            user.inProgressBooks.push(bookId);
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in finding user"
+            });
+        }
+    } catch (err) {
+        const error = new RequestError("Error in adding book to fav.", 400, err);
+        next(error);
+    }
 };
