@@ -16,7 +16,8 @@ import {
     updateInProgress
 } from '../controllers/user-controller.js'
 import checkAuth from "../middlewares/check-auth";
-import {check} from "express-validator";
+import {body, check} from "express-validator";
+import {singleFileUpload} from "../middlewares/single-file-upload";
 
 const router = express.Router();
 
@@ -32,7 +33,19 @@ router.get('/get/inProgress', checkAuth, getUserInProgress);
 
 router.get('/get/completed', checkAuth, getUserCompleted);
 
-router.patch('/patch', checkAuth, editProfile);
+router.patch('/patch', [
+    body('name')
+        .not()
+        .isEmpty(),
+    body('mobile')
+        .not()
+        .isEmpty(),
+    body('imgHash').not().isEmpty(),
+    body('email')
+        .normalizeEmail()
+        .isEmail(),
+    singleFileUpload('uploads/images','img'),
+],checkAuth, editProfile);
 
 router.patch('/patch/addPoints', [
     check('rewardPoints')

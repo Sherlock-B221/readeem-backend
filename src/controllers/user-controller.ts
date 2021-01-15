@@ -1,5 +1,4 @@
 import User from "../models/user";
-import Book from "../models/book";
 import RequestError from "../middlewares/request-error";
 import {NextFunction, Request, RequestHandler, Response} from "express";
 import {checkTokens} from "../utils/check-tokens";
@@ -123,7 +122,7 @@ export const addRewardPoints: RequestHandler = async (req: Request, res: Respons
     const rewardPoints = req.body.rewardPoints;
     const userId = req.userData.userId;
     try {
-        const user:IUser = await User.findById(userId);
+        const user: IUser = await User.findById(userId);
         if (user) {
             user.reward += rewardPoints;
             await user.save();
@@ -174,7 +173,7 @@ export const addToCart: RequestHandler = async (req: Request, res: Response, nex
     const items = req.body.items;
     const userId = req.userData.userId;
     try {
-        const user:IUser = await User.findById(userId);
+        const user: IUser = await User.findById(userId);
         if (user) {
             user.cart.push(items);
             await user.save();
@@ -197,19 +196,47 @@ export const addToCart: RequestHandler = async (req: Request, res: Response, nex
 };
 
 export const editProfile: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-        "status": "TS works bitch"
-    });
+    //validation
+    validate(req, next);
+    const {name, email, password, mobile, imgHash} = req.body;
+    // if email is sent, then revoke thirdParty access.
+    const userId = req.userData.userId;
+    let existingUser;
+    try {
+        existingUser = await User.findById(userId);
+    } catch (err) {
+        const error = new RequestError("Error querying database", 500, err);
+        return next(error);
+    }
+    if(!existingUser){
+        const error = new RequestError("User doesn't exist.", 500,);
+        return next(error);
+    }
+    try{
+        let filePath;
+        if (req.file) {
+            filePath = req.file.path;
+        } else {
+            filePath = 'uploads/images/DUser.png';
+        }
+        filePath = 'https://win75.herokuapp.com/' + filePath;
+        //TODO: change url
+
+
+    }catch(err){
+        const error = new RequestError("Error in editing user.", 500,err);
+        return next(error);
+    }
 };
 
 export const removeFromCart: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const itemsToBeRemoved = req.body.items;
+    const itemsToBeRemoved: Array<string> = req.body.items;
     const userId = req.userData.userId;
     try {
-        const user:IUser = await User.findById(userId);
+        const user: IUser = await User.findById(userId);
         if (user) {
-            user.cart = user.cart.filter((item) => itemsToBeRemoved.includes(item));
+            user.cart = user.cart.filter((item) => !itemsToBeRemoved.includes(item._id));
             await user.save();
             const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
             await res.json({
@@ -234,11 +261,9 @@ export const removeFromFav: RequestHandler = async (req: Request, res: Response,
     const bId = req.body.bookId;
     const userId = req.userData.userId;
     try {
-        const user:IUser = await User.findById(userId);
+        const user: IUser = await User.findById(userId);
         if (user) {
-            user.favBooks = user.favBooks.filter((bookId) => {
-                return bId==bookId;
-            });
+            user.favBooks = user.favBooks.filter((bookId) => bId !== bookId);
             await user.save();
             const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
             await res.json({
@@ -305,7 +330,7 @@ export const addToFav: RequestHandler = async (req: Request, res: Response, next
         } else {
             await res.json({
                 "status": "failed"
-                , "message": "Error in finding user"
+                , "message": "Error in adding book to fav of user"
             });
         }
     } catch (err) {
@@ -317,13 +342,27 @@ export const addToFav: RequestHandler = async (req: Request, res: Response, next
 export const updateInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
     const userId = req.userData.userId;
-    const bookMark:BookMark = req.body.bookMark;
-    const bookId = bookMark.bookId;
-    try{
+    const newBookMark: BookMark = req.body.bookMark;
+    const bookId = newBookMark.bookId;
+    try {
         const user: IUser = await User.findById(userId);
+        let foundBookMarkIndex = false;
         if (user) {
-
-            user.inProgressBooks.push(bookId);
+            for (let i = 0; i < user.inProgressBooks.length; i++) {
+                if (user.inProgressBooks[i].bookId === bookId) {
+                    user.inProgressBooks[i] = newBookMark;
+                    foundBookMarkIndex = true;
+                    break;
+                }
+            }
+            if (!foundBookMarkIndex) {
+                await res.json({
+                    "status": "failed"
+                    , "message": "BookId not in in-progress list."
+                });
+            }
+            // As a user is reading the book, it's wise to keep it at 1st index for faster results.
+            user.inProgressBooks.reverse();
             await user.save();
             const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
             await res.json({
@@ -334,22 +373,23 @@ export const updateInProgress: RequestHandler = async (req: Request, res: Respon
         } else {
             await res.json({
                 "status": "failed"
-                , "message": "Error in finding user"
+                , "message": "Error in updating in-progress books of user"
             });
-        }catch{
-
         }
+    } catch (err) {
+        const error = new RequestError("Error in adding book to fav.", 400, err);
+        next(error);
     }
 };
 
 export const addToInProgress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
     const userId = req.userData.userId;
-    const bookId = req.body.bookId;
+    const bookMark: BookMark = req.body.bookMark;
     try {
         const user: IUser = await User.findById(userId);
         if (user) {
-            user.inProgressBooks.push(bookId);
+            user.inProgressBooks.push(bookMark);
             await user.save();
             const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
             await res.json({
@@ -364,7 +404,7 @@ export const addToInProgress: RequestHandler = async (req: Request, res: Respons
             });
         }
     } catch (err) {
-        const error = new RequestError("Error in adding book to fav.", 400, err);
+        const error = new RequestError("Error in adding book to In-progress.", 400, err);
         next(error);
     }
 };
