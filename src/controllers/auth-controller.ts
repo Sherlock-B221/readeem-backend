@@ -9,6 +9,7 @@ import RequestError from "../middlewares/request-error";
 import {validate} from "../utils/validate";
 import {sendMail} from "../utils/send-mail";
 import {getTokens} from "../utils/get-tokens";
+import {encodeImageToBlurhash} from "../utils/blurhash-utils";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     //validation
@@ -53,6 +54,7 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         name,
         email,
         mobile,
+        // if image is not sent, default hash would be sent
         imgHash,
         isThirdParty: false,
         isBoth: false,
@@ -153,7 +155,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunction) => {
     validate(req, next);
-    const {name, email, mobile, imgUrl, imgHash} = req.body;
+    const {name, email, mobile, img} = req.body;
     let existingUser;
     try {
         existingUser = await User.findOne({email: email});
@@ -180,20 +182,23 @@ export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunc
             }
 
         }
-        const error = new RequestError('User created using email, please login using email instead.', 422);
+        const error = new RequestError('Account created using email or email was changed in previous session, please login using email instead.', 422);
         return next(error);
     }
     const joinDateString = Date().toLocaleString();
     const joinDateObj = new Date(Date.parse(joinDateString));
+    let imgHash;
+    if(img){
+        imgHash = await encodeImageToBlurhash(img)
+    }
     const createdUser = new User({
         name,
         email,
         mobile,
-        imgHash,
+        img,
         isThirdParty: true,
         isBoth: false,
         joinDate:joinDateObj,
-        img: imgUrl,
         password: "",
         completedBooks: [],
         inProgressBooks: [],
@@ -203,6 +208,9 @@ export const thirdPartyAuth = async (req: Request, res: Response, next: NextFunc
         reward: 0,
         previousOrders: [],
     });
+    if(imgHash){
+        createdUser.imgHash = imgHash;
+    }
     try {
         await createdUser.save();
     } catch (err) {

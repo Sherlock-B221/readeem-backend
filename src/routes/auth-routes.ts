@@ -45,7 +45,6 @@ router.post('/thirdParty'
             .normalizeEmail()
             .isEmail(),
         body('img').not().isEmpty(),
-        body('imgHash').not().isEmpty(),
     ]
     , thirdPartyAuth
 );
