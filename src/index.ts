@@ -15,6 +15,8 @@ import orderRoutes from './routes/order-routes';
 // todo: 2 maybe improve super-user
 // todo: 4 try to use await Promise.all([user.save(), post.save()])
 // todo: 5 use virtual for better code quality
+// todo: 3 test thirdPartyAuth with the new BlurHash module.
+// todo: 6 add isBlurHashValid to controllers that use blur hash before saving to db.
 import RequestError from './middlewares/request-error';
 
 require('dotenv').config();
