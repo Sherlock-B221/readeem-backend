@@ -4,7 +4,8 @@ import {
     addToCart,
     addToCompleted,
     addToFav,
-    addToInProgress, editProfile,
+    addToInProgress,
+    editProfile,
     getUserById,
     getUserCart,
     getUserCompleted,
@@ -13,6 +14,7 @@ import {
     getUsers,
     removeFromCart,
     removeFromFav,
+    updateInCart,
     updateInProgress
 } from '../controllers/user-controller.js'
 import checkAuth from "../middlewares/check-auth";
@@ -44,13 +46,18 @@ router.patch('/patch', [
     body('email')
         .normalizeEmail()
         .isEmail(),
-    singleFileUpload('uploads/images','img'),
-],checkAuth, editProfile);
+    singleFileUpload('uploads/images', 'img'),
+], checkAuth, editProfile);
 
 router.patch('/patch/addPoints', [
     check('rewardPoints')
         .not().isEmpty(),
 ], checkAuth, addRewardPoints);
+
+router.patch('/patch/', [
+    check('cartItem')
+        .not().isEmpty()
+], updateInCart);
 
 router.patch('/patch/addToCart', [
     check('items')
