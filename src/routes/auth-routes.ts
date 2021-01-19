@@ -92,7 +92,7 @@ router.post('/resetPassword',
     resetPassword
 );
 
-router.post('/logout',
+router.get('/logout',
     checkAuth,
     logout
 );
