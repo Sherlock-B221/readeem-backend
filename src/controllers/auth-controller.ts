@@ -400,6 +400,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     }
 };
 
+// this is used after forgot password, when the user submits the form.
 export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     let token;
     try {

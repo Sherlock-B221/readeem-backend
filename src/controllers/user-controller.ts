@@ -5,6 +5,7 @@ import {checkTokens} from "../utils/check-tokens";
 import {validate} from "../utils/validate";
 import {IUser} from "../interfaces/user-interface";
 import {BookMark} from "../interfaces/book-mark";
+import {IOrderItem} from "../interfaces/order-interface";
 
 export const getUsers: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     let users;
@@ -195,6 +196,48 @@ export const addToCart: RequestHandler = async (req: Request, res: Response, nex
     }
 };
 
+export const updateInCart: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    validate(req, next);
+    try {
+        const {cartItem}: { cartItem: IOrderItem } = req.body;
+        const {userId} = req.userData;
+        const user: IUser = await User.findById(userId);
+        let foundCartIndex = false;
+        if (user) {
+            for (let i = 0; i < user.inProgressBooks.length; i++) {
+                if (user.cart[i]._id === cartItem._id) {
+                    user.cart[i] = cartItem;
+                    foundCartIndex = true;
+                    break;
+                }
+            }
+            if (!foundCartIndex) {
+                await res.json({
+                    "status": "failed"
+                    , "message": "ItemId not in cart list."
+                });
+            }
+            // As a user is confused about the quantity, it's wise to keep it at 1st index for faster results.
+            user.cart.reverse();
+            await user.save();
+            const changedTokenPair = checkTokens(req.isAccessTokenValid, req.refreshToken, req.accessToken);
+            await res.json({
+                "status": "success",
+                "user": user,
+                ...changedTokenPair
+            });
+        } else {
+            await res.json({
+                "status": "failed"
+                , "message": "Error in updating cart item of user"
+            });
+        }
+    } catch (e) {
+        const error = new RequestError("Error in updating items in cart.", 400, e);
+        next(error);
+    }
+};
+
 export const editProfile: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     //validation
     validate(req, next);
@@ -208,11 +251,11 @@ export const editProfile: RequestHandler = async (req: Request, res: Response, n
         const error = new RequestError("Error querying database", 500, err);
         return next(error);
     }
-    if(!existingUser){
+    if (!existingUser) {
         const error = new RequestError("User doesn't exist.", 500,);
         return next(error);
     }
-    try{
+    try {
         let filePath;
         if (req.file) {
             filePath = req.file.path;
@@ -223,8 +266,8 @@ export const editProfile: RequestHandler = async (req: Request, res: Response, n
         //TODO: change url
 
 
-    }catch(err){
-        const error = new RequestError("Error in editing user.", 500,err);
+    } catch (err) {
+        const error = new RequestError("Error in editing user.", 500, err);
         return next(error);
     }
 };
