@@ -1,7 +1,6 @@
 # Project exclude paths
 /node_modules/
 *.js
-/dist
 .idea
 .env
 /uploads
