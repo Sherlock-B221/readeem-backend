@@ -1,8 +1,6 @@
 # Project exclude paths
 /node_modules/
-*.js
 .idea
 .env
-/uploads
 package-lock.json
 
