@@ -10,6 +10,10 @@ class RequestError implements ErrorWithCode {
         // If err is passed, it will be logged on the console
         if (err) {
             console.log("\n")
+            console.log("\n")
+            console.log("\n")
+            console.log("\n")
+           
             const currentDate = new Date();
 
             const datetime = currentDate.getDate() + "/"
@@ -20,7 +24,9 @@ class RequestError implements ErrorWithCode {
                 + currentDate.getSeconds();
 
             console.log(`The following error occurred on ${datetime}:`);
+            console.log("\n")
             console.log(err);
+            console.log("\n")
             console.log("error->catch");
             console.log("\n")
         }
