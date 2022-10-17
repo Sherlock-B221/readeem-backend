@@ -4,6 +4,7 @@ import {IUser} from '../interfaces/user-interface';
 
 
 const UserSchema: mongoose.Schema = new mongoose.Schema({
+    // a random comment for hacktoberfest
     name: {type: String, required: true},
     password: {type: String, required: true},
     completedBooks: [{type: mongoose.Types.ObjectId, ref: 'Book'}],
