@@ -13,6 +13,8 @@ class RequestError implements ErrorWithCode {
             console.log("\n")
             console.log("\n")
             console.log("\n")
+            console.log("\n")
+            console.log("\n")
            
             const currentDate = new Date();
 
