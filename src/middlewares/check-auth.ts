@@ -27,6 +27,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
         // this is the case when the token sent has not been involved in logout or changePass
         if (!tokenBlacklisted) {
             try {
+                console.log("here");
                 const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY);
                 const changePasswordDate = (decodedAccessToken as DecodedToken).changePasswordDate;
                 req.userData = {
@@ -47,6 +48,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
                 req.refreshToken = refreshToken;
                 next();
             } catch (e) {
+                console.log(e)
                 if (!refreshRevoked) {
                     const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY);
                     const iat = (decodedRefreshToken as DecodedToken).iat;
@@ -105,6 +107,7 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
         }
     } catch (err) {
         const error = new RequestError(`Error with token. Info: ${JSON.stringify(err)}`, 403);
+        console.log(error);
         return next(error);
     }
 };
